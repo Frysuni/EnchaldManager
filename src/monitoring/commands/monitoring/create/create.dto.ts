@@ -1,5 +1,4 @@
 import { Choice, Param, ParamType } from "@discord-nestjs/core";
-import { ColorResolvable } from "discord.js";
 import { VersionEnum } from "~/monitoring/enums/version.enum";
 
 export class CreateDto {
@@ -12,16 +11,6 @@ export class CreateDto {
     type: ParamType.STRING,
   })
   serverName: string;
-
-  @Param({
-    name: 'color',
-    nameLocalizations: { ru: 'цвет' },
-    description: 'The color accent of the server. Accepts any resolvable color in #hex format.',
-    descriptionLocalizations: { ru: 'Цветовой акцент сервера. Принимает любой разрешимый цвет в формате #hex.' },
-    required: true,
-    type: ParamType.STRING,
-  })
-  color: ColorResolvable;
 
   @Param({
     name: 'token',
@@ -55,24 +44,36 @@ export class CreateDto {
   address: string;
 
   @Param({
-    name: 'restart_time',
-    nameLocalizations: { ru: 'время_рестарта' },
-    description: 'The moment of time when the restart begins, the bot will do everything automatically. Syntax: HH:MM',
-    descriptionLocalizations: { ru: 'Момент времени, когда начинается рестарт, бот дальше все сделает автоматически. Синтаксис: ЧЧ:ММ' },
+    name: 'restart_start_cron',
+    nameLocalizations: { ru: 'cron_начала_рестарта' },
+    description: 'Crontab syntax of the restart start time.',
+    descriptionLocalizations: { ru: 'Crontab синтаксис времени начала рестарта.' },
     required: true,
     type: ParamType.STRING,
   })
-  restartTime: string;
+  restartStartCron: string;
 
   @Param({
-    name: 'backup_time',
-    nameLocalizations: { ru: 'время_бэкапа' },
-    description: 'The time interval when the backup is done. Example: MON_00:30-TUE_06:00.',
-    descriptionLocalizations: { ru: 'Промежуток времени, когда делается бэкап. Пример: MON_00:30-TUE_06:00.' },
+    name: 'backup_start_cron',
+    nameLocalizations: { ru: 'cron_начала_бэкапа' },
+    description: 'Crontab syntax of the backup start time.',
+    descriptionLocalizations: { ru: 'Crontab синтаксис времени начала бэкапа.' },
     required: true,
     type: ParamType.STRING,
   })
-  backupTime: string;
+  backupStartCron: string;
+
+  @Param({
+    name: 'backup_duration_time',
+    nameLocalizations: { ru: 'время_длительности_бэкапа' },
+    description: 'Длительность бэкапа в минутах.',
+    descriptionLocalizations: { ru: 'Backup duration in minutes.' },
+    required: true,
+    minValue: 1,
+    maxValue: 1399,
+    type: ParamType.INTEGER,
+  })
+  backupDurationTime: number;
 
   @Param({
     name: 'hidden_players',
@@ -89,10 +90,21 @@ export class CreateDto {
     nameLocalizations: { ru: 'интервал_обновления' },
     description: 'The time in seconds after which the status will be updated. Default: 60',
     descriptionLocalizations: { ru: 'Время в секундах, через которое статус будет обновлен. По умолчанию: 60' },
-    required: true,
+    required: false,
     type: ParamType.INTEGER,
     minValue: 10,
     maxValue: 3600,
   })
-  updateInterval: number;
+  updateInterval = 60;
+
+  @Param({
+    name: 'timezone_utc_offset',
+    description: 'The time zone offset relative to UTC. For example: +05:30',
+    descriptionLocalizations: { ru: 'Смещение часового пояса относительно UTC. Например: +05:30' },
+    required: false,
+    type: ParamType.STRING,
+    minLength: 6,
+    maxLength: 6,
+  })
+  timezoneUtcOffset?: string;
 }

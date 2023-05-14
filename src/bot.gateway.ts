@@ -23,6 +23,6 @@ export class BotGateway {
       }
 
       this.logger.log(`Бот ${this.client.user?.tag} запущен!`);
-    })
+    });
   }
 }

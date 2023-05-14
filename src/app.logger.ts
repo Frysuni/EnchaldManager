@@ -20,7 +20,7 @@ export class AppLogger extends ConsoleLogger implements LoggerService {
       String.fromCharCode(...context),
     );
 
-    process.addListener('unhandledRejection', (error: Error) => this.error(error.message, error.stack ?? ''))
+    process.addListener('unhandledRejection', (error: Error) => this.error(error.message, error.stack ?? ''));
   }
 
   public override error(message: string, trace: string): void {

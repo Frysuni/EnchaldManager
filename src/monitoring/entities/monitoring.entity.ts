@@ -10,9 +10,6 @@ export class MonitoringEntity {
   serverName: string;
 
   @Column()
-  color: number;
-
-  @Column()
   token: string;
 
   @Column()
@@ -25,22 +22,28 @@ export class MonitoringEntity {
   port: number;
 
   @Column()
-  channelId: string;
-
-  @Column({ nullable: true })
-  messageId: string;
+  restartStartCron: string;
 
   @Column()
-  backupTime: string;
+  backupStartCron: string;
 
   @Column()
-  restartTime: string;
+  backupDurationTime: number;
 
   @Column()
   hiddenPlayers: string;
 
   @Column()
   updateInterval: number;
+
+  @Column()
+  timezoneUtcOffset: number;
+
+  @Column()
+  channelId: string;
+
+  @Column({ nullable: true })
+  messageId: string;
 
   @Column({ default: false })
   confirmed: boolean;

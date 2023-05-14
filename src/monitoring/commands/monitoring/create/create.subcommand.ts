@@ -1,17 +1,20 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, EmbedBuilder, Events, Interaction, InteractionReplyOptions, resolveColor } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Colors, EmbedBuilder, Events, Interaction, InteractionReplyOptions } from "discord.js";
 import { MonitoringRecordStatusEnum } from "~/monitoring/enums/monitoringRecordStatus.enum";
 import { VersionEnum } from "~/monitoring/enums/version.enum";
 import { MonitoringService } from "~/monitoring/monitoring.service";
+import { convertMinutesToOffset, convertOffsetToMinutes } from "~/monitoring/utils";
 import { CreateDto } from "./create.dto";
 
 const confirmButtonCustomIdConstant = 'commands.monitoring.create.confirm';
 const  cancelButtonCustomIdConstant = 'commands.monitoring.create.cancel';
 
-const restartTimeRegex = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
-const backupTimeRegex  = /^(?:MON|TUE|WED|THU|FRI|SAT|SUN)_(?:[01]\d|2[0-3]):[0-5]\d-(?:MON|TUE|WED|THU|FRI|SAT|SUN)_(?:[01]\d|2[0-3]):[0-5]\d$/;
-const addressRegex     = /^(?:[\w-]+\.)+[\w-]{2,}(?::\d+)?|(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?$/i;
+const timezoneUtcOffsetRegex = /^(-1[0-2]|0\d|\+1[0-4]):(00|15|30|45)$/;
+const addressRegex           = /^(?:[\w-]+\.)+[\w-]{2,}(?::\d+)?|(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?$/i;
+const cronRegex              = /^(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)(\s+(\*|[0-9-\/]+))?$/;
+
+const reply = (content: string): InteractionReplyOptions => ({ content, ephemeral: true });
 
 @SubCommand({
   name: 'create',
@@ -31,52 +34,56 @@ export class CreateSubcommand {
     @IA() interaction: ChatInputCommandInteraction
   ): Promise<InteractionReplyOptions> {
 
-    let color: number;
-    try { color = resolveColor(options.color); }
-    catch (_) { return { content: `Цвет \`${options.color}\` не поддерживается или набран неверно.`, ephemeral: true }; }
+    console.log(options);
 
-    if (!restartTimeRegex.test(options.restartTime)) {
-      return { content: `Время перезагрузки указано неверно. Проверьте синтаксис: ЧЧ:ММ Получно: \`${options.restartTime}\``, ephemeral: true }; }
-    if (!backupTimeRegex.test(options.backupTime)) {
-      return { content: `Время бекапа указано неверно. Пример: MON_00:30-TUE_06:00. (XXX - первые три буквы дня недели) Получено: ${options.backupTime}` }; }
+    if (!cronRegex.test(options.restartStartCron)) {
+      return reply('Время перезагрузки указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
+    if (!cronRegex.test(options.backupStartCron)) {
+      return reply('Время бекапа указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
     if (!addressRegex.test(options.address)) {
-      return { content: `Адрес указан неверно. Получено: \`${options.address}\``, ephemeral: true }; }
+      return reply('Адрес указан неверно.'); }
+    if (options.timezoneUtcOffset && !timezoneUtcOffsetRegex.test(options.timezoneUtcOffset)) {
+      return reply('Смещение часового пояса относительно UTC указано неверно. https://en.wikipedia.org/wiki/List_of_UTC_offsets'); }
+
+    let timezoneUtcOffset = new Date().getTimezoneOffset();
+    if (options.timezoneUtcOffset) timezoneUtcOffset = convertOffsetToMinutes(options.timezoneUtcOffset);
 
     const address = options.address.split(':');
     const record = await this.monitoringService.createMonitoring({
-      serverName:     options.serverName,
-      color:          color,
-      token:          options.token,
-      version:        options.version,
-      address:        address[0],
-      port:           address[1] ? Number(address[1]) : 25565,
-      channelId:      interaction.channelId,
-      messageId:      undefined,
-      restartTime:    options.restartTime,
-      backupTime:     options.backupTime,
-      hiddenPlayers:  options.hiddenPlayers ?? '',
-      updateInterval: options.updateInterval ?? 60,
+      serverName:         options.serverName,
+      token:              options.token,
+      version:            options.version,
+      address:            address[0],
+      port:               address[1] ? Number(address[1]) : 25565,
+      restartStartCron:   options.restartStartCron,
+      backupStartCron:    options.backupStartCron,
+      backupDurationTime: options.backupDurationTime,
+      hiddenPlayers:      options.hiddenPlayers ?? '',
+      updateInterval:     options.updateInterval ?? 60,
+      timezoneUtcOffset:  timezoneUtcOffset,
+      channelId:          interaction.channelId,
     });
 
     const confirmationEmbed = new EmbedBuilder()
       .setAuthor({ name: `IID: ${record.id}` }) // It's not a mistake, just trust me
-      .setColor(record.color)
+      .setColor(Colors.Fuchsia)
       .setFields({
         name: 'Подтвердите правильность введённых данных:',
         value:
-          `Имя сервера:         **\`${record.serverName}\`**\n` +
-          `Цвет:                **\`${options.color} (${record.color})\`**\n` +
-          `Токен:               **\`${record.token.slice(0, 4)}...${record.token.slice(-4)}\`**\n` +
-          `Версия:              **\`${VersionEnum[record.version]}\`**\n` +
-          `Адрес:               **\`${record.address}\`**\n` + 
-          `Порт:                **\`${record.port}\`**\n` +
-          `Время рестарта:      **\`${record.restartTime}\`**\n` +
-          `Время бэкапа:        **\`${record.backupTime}\`**\n` +
-          `Скрытые игроки:          ${record.hiddenPlayers.split(',').map(nick => `\`${nick}\``).join(' ')}\n` +
-          `Интервал обновления: **\`${record.updateInterval}\`**`,
+          `Имя сервера:               **\`${record.serverName}\`**\n` +
+          `Токен:                     **\`${record.token.slice(0, 4)}...${record.token.slice(-4)}\`**\n` +
+          `Версия:                    **\`${VersionEnum[record.version]}\`**\n` +
+          `Адрес:                     **\`${record.address}\`**\n` +
+          `Порт:                      **\`${record.port}\`**\n` +
+          `Cron начала рестарта:      **\`${record.restartStartCron}\`**\n` +
+          `Cron начала бэкапа:        **\`${record.backupStartCron}\`**\n` +
+          `Время длительности бэкапа: **\`${record.backupDurationTime}\`**\n` +
+          `Скрытые игроки:                ${record.hiddenPlayers.split(',').map(nick => `\`${nick}\``).join(' ')}\n` +
+          `Интервал обновления:       **\`${record.updateInterval}\`**\n` +
+          `Смещение часового пояса:   **\`${convertMinutesToOffset(record.timezoneUtcOffset)}\`** **\`(${record.timezoneUtcOffset})\`**`,
       })
-      .setFooter({ text: 'Данные были валидированы только на наличие грубых или синтаксических ошибок, но тонкости проверены не были. Бот не гарантирует правильную работу при указании неверных данных!' });
-      console.log(record.hiddenPlayers.split(',').map(nick => nick ? `\`${nick}\`` : '').join(' '), 'asd11');
+      .setFooter({ text: 'Данные были валидированы только на наличие грубых или синтаксических ошибок, но тонкости проверены не были. Бот гарантирует неправильную работу при указании неверных данных!' });
+      console.log(confirmationEmbed.data.fields?.[0].value);
     const buttonsRow = new ActionRowBuilder<ButtonBuilder>()
       .setComponents(
         new ButtonBuilder()
@@ -109,12 +116,12 @@ export class CreateSubcommand {
     const status = await this.monitoringService.getMonitoringRecordStatus(iid);
     if (status === MonitoringRecordStatusEnum.Confirmed) return { content: 'Этот мониторинг уже был подтверждён.', ephemeral: true };
     if (status === MonitoringRecordStatusEnum.Cancelled) return { content: 'Этот мониторинг уже был отменён.', ephemeral: true };
-    
+
     const embed = new EmbedBuilder().setDescription('Мониторинг создан, идет инициализация...');
 
     interaction.message.channel.send({ embeds: [embed] }).then(message => {
       this.monitoringService.confirmMonitring(iid, message.id);
-    })
+    });
 
     return { content: `Данные подтверждены. Мониторинг IID: ${iid} запущен в произовдство.`, ephemeral: true };
   }
@@ -130,10 +137,10 @@ export class CreateSubcommand {
     const status = await this.monitoringService.getMonitoringRecordStatus(iid);
     if (status === MonitoringRecordStatusEnum.Confirmed) return { content: 'Этот мониторинг уже был подтверждён.', ephemeral: true };
     if (status === MonitoringRecordStatusEnum.Cancelled) return { content: 'Этот мониторинг уже был отменён.', ephemeral: true };
-    
+
     this.monitoringService.cancelMonitoring(iid);
 
-    return { content: `Понял тебя, это выбросил в мусорку. Спасибо, что следишь за тем, чем меня кормишь.`, ephemeral: true };
+    return { content: `Понял тебя, это выбросил в мусорку. Спасибо.`, ephemeral: true };
   }
 
 }
