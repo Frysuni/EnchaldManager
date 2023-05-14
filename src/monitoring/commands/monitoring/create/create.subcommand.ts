@@ -34,8 +34,6 @@ export class CreateSubcommand {
     @IA() interaction: ChatInputCommandInteraction
   ): Promise<InteractionReplyOptions> {
 
-    console.log(options);
-
     if (!cronRegex.test(options.restartStartCron)) {
       return reply('Время перезагрузки указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
     if (!cronRegex.test(options.backupStartCron)) {
@@ -45,7 +43,7 @@ export class CreateSubcommand {
     if (options.timezoneUtcOffset && !timezoneUtcOffsetRegex.test(options.timezoneUtcOffset)) {
       return reply('Смещение часового пояса относительно UTC указано неверно. https://en.wikipedia.org/wiki/List_of_UTC_offsets'); }
 
-    let timezoneUtcOffset = new Date().getTimezoneOffset();
+    let timezoneUtcOffset = -new Date().getTimezoneOffset();
     if (options.timezoneUtcOffset) timezoneUtcOffset = convertOffsetToMinutes(options.timezoneUtcOffset);
 
     const address = options.address.split(':');
@@ -58,15 +56,19 @@ export class CreateSubcommand {
       restartStartCron:   options.restartStartCron,
       backupStartCron:    options.backupStartCron,
       backupDurationTime: options.backupDurationTime,
-      hiddenPlayers:      options.hiddenPlayers ?? '',
-      updateInterval:     options.updateInterval ?? 60,
+      hiddenPlayers:      options.hiddenPlayers,
+      updateInterval:     options.updateInterval,
       timezoneUtcOffset:  timezoneUtcOffset,
       channelId:          interaction.channelId,
     });
 
+    const hiddenPlayersArray = record.hiddenPlayers.split(',');
+    const formattedHiddenPlayers = hiddenPlayersArray.length > 0
+      ? hiddenPlayersArray.map(nick => `\`${nick.replace(/`/g, '\\`')}\``).join(' ') + ` **(${hiddenPlayersArray.length})**`
+      : 'Нет скрытых игроков';
     const confirmationEmbed = new EmbedBuilder()
       .setAuthor({ name: `IID: ${record.id}` }) // It's not a mistake, just trust me
-      .setColor(Colors.Fuchsia)
+      .setColor(Colors.Blurple)
       .setFields({
         name: 'Подтвердите правильность введённых данных:',
         value:
@@ -78,12 +80,12 @@ export class CreateSubcommand {
           `Cron начала рестарта:      **\`${record.restartStartCron}\`**\n` +
           `Cron начала бэкапа:        **\`${record.backupStartCron}\`**\n` +
           `Время длительности бэкапа: **\`${record.backupDurationTime}\`**\n` +
-          `Скрытые игроки:                ${record.hiddenPlayers.split(',').map(nick => `\`${nick}\``).join(' ')}\n` +
+          `Скрытые игроки:                ${formattedHiddenPlayers}\n` +
           `Интервал обновления:       **\`${record.updateInterval}\`**\n` +
           `Смещение часового пояса:   **\`${convertMinutesToOffset(record.timezoneUtcOffset)}\`** **\`(${record.timezoneUtcOffset})\`**`,
       })
       .setFooter({ text: 'Данные были валидированы только на наличие грубых или синтаксических ошибок, но тонкости проверены не были. Бот гарантирует неправильную работу при указании неверных данных!' });
-      console.log(confirmationEmbed.data.fields?.[0].value);
+
     const buttonsRow = new ActionRowBuilder<ButtonBuilder>()
       .setComponents(
         new ButtonBuilder()

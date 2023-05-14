@@ -66,8 +66,8 @@ export class CreateDto {
   @Param({
     name: 'backup_duration_time',
     nameLocalizations: { ru: 'время_длительности_бэкапа' },
-    description: 'Длительность бэкапа в минутах.',
-    descriptionLocalizations: { ru: 'Backup duration in minutes.' },
+    description: 'Backup duration in minutes.',
+    descriptionLocalizations: { ru: 'Длительность бэкапа в минутах.' },
     required: true,
     minValue: 1,
     maxValue: 1399,
@@ -83,7 +83,7 @@ export class CreateDto {
     required: false,
     type: ParamType.STRING,
   })
-  hiddenPlayers?: string;
+  hiddenPlayers = '';
 
   @Param({
     name: 'update_interval',

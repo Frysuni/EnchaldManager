@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
 import {
   DiscordModule,
   DiscordModuleOption,
   DiscordOptionsFactory,
 } from '@discord-nestjs/core';
-import { GatewayIntentBits, Partials } from 'discord.js';
+import { Injectable } from '@nestjs/common';
+import { GatewayIntentBits } from 'discord.js';
 import envConfig from 'envConfig';
 
 @Injectable()

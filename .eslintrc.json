@@ -32,7 +32,7 @@
       }
     ],
     "comma-dangle": [
-      "warn",
+      "error",
       "always-multiline"
     ],
     "comma-spacing": "error",
