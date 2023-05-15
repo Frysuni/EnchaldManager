@@ -5,16 +5,12 @@ import { MonitoringRecordStatusEnum } from "~/monitoring/enums/monitoringRecordS
 import { VersionEnum } from "~/monitoring/enums/version.enum";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { convertMinutesToOffset, convertOffsetToMinutes } from "~/monitoring/utils";
+import { baseDtoValidator } from "../baseDtoParams";
 import { CreateDto } from "./create.dto";
 
 const confirmButtonCustomIdConstant = 'commands.monitoring.create.confirm';
 const  cancelButtonCustomIdConstant = 'commands.monitoring.create.cancel';
 
-const timezoneUtcOffsetRegex = /^(-1[0-2]|0\d|\+1[0-4]):(00|15|30|45)$/;
-const addressRegex           = /^(?:[\w-]+\.)+[\w-]{2,}(?::\d+)?|(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?$/i;
-const cronRegex              = /^(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)(\s+(\*|[0-9-\/]+))?$/;
-
-const reply = (content: string): InteractionReplyOptions => ({ content, ephemeral: true });
 
 @SubCommand({
   name: 'create',
@@ -32,16 +28,10 @@ export class CreateSubcommand {
   async handler(
     @IA(SlashCommandPipe) options: CreateDto,
     @IA() interaction: ChatInputCommandInteraction
-  ): Promise<InteractionReplyOptions> {
+  ): Promise<InteractionReplyOptions | void> {
 
-    if (!cronRegex.test(options.restartStartCron)) {
-      return reply('Время перезагрузки указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
-    if (!cronRegex.test(options.backupStartCron)) {
-      return reply('Время бекапа указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
-    if (!addressRegex.test(options.address)) {
-      return reply('Адрес указан неверно.'); }
-    if (options.timezoneUtcOffset && !timezoneUtcOffsetRegex.test(options.timezoneUtcOffset)) {
-      return reply('Смещение часового пояса относительно UTC указано неверно. https://en.wikipedia.org/wiki/List_of_UTC_offsets'); }
+    const validationError = baseDtoValidator(options);
+    if (validationError) return validationError;
 
     let timezoneUtcOffset = -new Date().getTimezoneOffset();
     if (options.timezoneUtcOffset) timezoneUtcOffset = convertOffsetToMinutes(options.timezoneUtcOffset);
