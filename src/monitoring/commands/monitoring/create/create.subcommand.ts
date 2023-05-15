@@ -5,7 +5,7 @@ import { MonitoringRecordStatusEnum } from "~/monitoring/enums/monitoringRecordS
 import { VersionEnum } from "~/monitoring/enums/version.enum";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { convertMinutesToOffset, convertOffsetToMinutes } from "~/monitoring/utils";
-import { baseDtoValidator } from "../baseDtoParams";
+import { baseDtoValidator } from "../common";
 import { CreateDto } from "./create.dto";
 
 const confirmButtonCustomIdConstant = 'commands.monitoring.create.confirm';

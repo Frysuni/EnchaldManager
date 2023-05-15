@@ -1,6 +1,6 @@
 import { Choice, Param, ParamType } from "@discord-nestjs/core";
 import { VersionEnum } from "~/monitoring/enums/version.enum";
-import { MonitoringBaseDto, monitoringBaseParams } from "../baseDtoParams";
+import { MonitoringBaseDto, monitoringBaseParams } from "../common";
 
 type PartialMonitoringBaseDtoWithTargerType = Partial<MonitoringBaseDto> & { target: number }
 

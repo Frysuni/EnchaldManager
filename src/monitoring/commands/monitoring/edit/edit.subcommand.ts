@@ -4,7 +4,7 @@ import { ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, Events
 import { MonitoringEntity } from "~/monitoring/entities/monitoring.entity";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { convertOffsetToMinutes } from "~/monitoring/utils";
-import { baseDtoValidator } from "../baseDtoParams";
+import { baseDtoValidator } from "../common";
 import { EditDto } from "./edit.dto";
 
 @SubCommand({

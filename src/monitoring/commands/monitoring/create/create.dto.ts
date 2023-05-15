@@ -1,6 +1,6 @@
 import { Choice, Param } from "@discord-nestjs/core";
 import { VersionEnum } from "~/monitoring/enums/version.enum";
-import { MonitoringBaseDto, monitoringBaseParams } from "../baseDtoParams";
+import { MonitoringBaseDto, monitoringBaseParams } from "../common";
 
 export class CreateDto implements Partial<MonitoringBaseDto> {
   @Param({ ...monitoringBaseParams.serverName, required: true })
