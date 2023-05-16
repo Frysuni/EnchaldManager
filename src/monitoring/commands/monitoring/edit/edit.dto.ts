@@ -5,16 +5,7 @@ import { MonitoringBaseDto, monitoringBaseParams } from "../common";
 type PartialMonitoringBaseDtoWithTargerType = Partial<MonitoringBaseDto> & { target: number }
 
 export class EditDto implements PartialMonitoringBaseDtoWithTargerType {
-  @Param({
-    name: 'target',
-    nameLocalizations: { ru: 'цель' },
-    description: 'The target name of the monitoring server.',
-    descriptionLocalizations: { ru: 'Целевое имя сервера мониторинга.' },
-    autocomplete: true,
-    minValue: 1,
-    required: true,
-    type: ParamType.NUMBER,
-  })
+  @Param(monitoringBaseParams.target)
   target: number;
 
   @Param({ ...monitoringBaseParams.serverName, required: false })

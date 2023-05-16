@@ -40,6 +40,8 @@ export class EditSubcommand {
     for (const key in updateEntity) if (updateEntity[key as keyof MonitoringEntity] === undefined) delete updateEntity[key as keyof MonitoringEntity];
 
     this.monitoringService.updateMonitoring(options.target, updateEntity);
+
+    return { content: 'Успешно обновлено! Мониторинг будет перезапущен в течении нескольких секунд.', ephemeral: true };
   }
 
   @On(Events.InteractionCreate)

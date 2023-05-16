@@ -29,6 +29,7 @@ export class MonitoringNode {
     this.init();
   }
 
+  private nodeUpdateInterval: NodeJS.Timer | undefined;
   private async init(): Promise<any> {
     const node = await this.monitroingRepository.findOne({ where: { id: this.monitroingId } });
     if (!node) return;
@@ -40,7 +41,24 @@ export class MonitoringNode {
     this.backupCronJob  = new CronJob(node.backupStartCron,  this.backupHandler.bind(this),  undefined, true, undefined, 'backupHandler',  undefined, node.timezoneUtcOffset);
 
     this.updateNodeStatus();
-    setInterval(this.updateNodeStatus.bind(this), node.updateInterval * 1000);
+    this.nodeUpdateInterval = setInterval(this.updateNodeStatus.bind(this), node.updateInterval * 1000);
+  }
+
+  public async destroy(): Promise<any> {
+    const channel = this.nodeClient.channels.cache.get(this.node.channelId) as TextBasedChannel | undefined;
+    const message = await channel?.messages?.fetch(this.node.messageId) as Message<true> | undefined;
+    await message?.delete();
+
+    clearInterval(this.nodeUpdateInterval);
+    clearTimeout(this.backupTimeout);
+    this.restartCronJob.stop();
+    this.backupCronJob.stop();
+    this.nodeClient.destroy();
+    (this.restartCronJob as CronJob | null) = null;
+    (this.backupCronJob as CronJob | null) = null;
+    this.nodeUpdateInterval = undefined;
+    this.backupTimeout = undefined;
+    (this.nodeClient as Client | null) = null;
   }
 
   private async updateNodeStatus(): Promise<any> {
@@ -81,7 +99,7 @@ export class MonitoringNode {
     this.setStatus(this.node.channelId, this.node.messageId, embed, presence);
   }
 
-
+  private backupTimeout: NodeJS.Timeout | undefined;
   private backupHandler(): any {
     if (!this.serverIsOnline) return;
 
@@ -90,7 +108,7 @@ export class MonitoringNode {
     const { embed, presence } = this.monitoringStatuses.getBackuping(this.node.serverName);
     this.setStatus(this.node.channelId, this.node.messageId, embed, presence);
 
-    setTimeout(() => this.isBackuping = false, this.node.backupDurationTime * 1000);
+    this.backupTimeout = setTimeout(() => this.isBackuping = false, this.node.backupDurationTime * 1000);
   }
 
   private async setStatus(channelId: string, messageId: string, embed: EmbedBuilder, presence: PresenceData): Promise<any> {

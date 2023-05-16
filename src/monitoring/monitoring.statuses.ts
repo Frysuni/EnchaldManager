@@ -92,7 +92,7 @@ export class MonitoringStatuses {
   private getEmbedBase(color: typeof Colors[keyof typeof Colors], serverName: string): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(color)
-      .setTitle(`Мониторинг Enchald ${serverName}`);
+      .setTitle(`Мониторинг ${serverName}`);
   }
 
   private emojis: {

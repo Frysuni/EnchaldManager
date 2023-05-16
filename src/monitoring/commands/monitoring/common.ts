@@ -16,7 +16,17 @@ export interface MonitoringBaseDto {
   readonly timezoneUtcOffset:  string;
 }
 
-export const monitoringBaseParams: Record<keyof MonitoringBaseDto, ParamOptions> = {
+export const monitoringBaseParams: Record<'target' | keyof MonitoringBaseDto, ParamOptions> = {
+  target: {
+    name: 'target',
+    nameLocalizations: { ru: 'цель' },
+    description: 'The target name of the monitoring server.',
+    descriptionLocalizations: { ru: 'Целевое имя сервера мониторинга.' },
+    autocomplete: true,
+    minValue: 1,
+    required: true,
+    type: ParamType.NUMBER,
+  },
   serverName: {
     name: 'server_name',
     nameLocalizations: { ru: 'имя_сервера' },

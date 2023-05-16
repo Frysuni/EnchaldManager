@@ -9,7 +9,7 @@ import { MonitoringStatuses } from "./monitoring.statuses";
 
 @Injectable()
 export class MonitoringService {
-  private readonly monitoringNodes = new Set<MonitoringNode>();
+  private readonly monitoringNodes = new Map<number, MonitoringNode>();
 
   constructor(
     @InjectRepository(MonitoringEntity) private readonly monitoringRepository: Repository<MonitoringEntity>,
@@ -30,6 +30,7 @@ export class MonitoringService {
     this.initNode(id);
     return updateResult;
   }
+
   public cancelMonitoring(id: number): Promise<DeleteResult> {
     return this.monitoringRepository.delete({ id });
   }
@@ -52,13 +53,26 @@ export class MonitoringService {
     return searchResult.slice(0, 25);
   }
 
-  public updateMonitoring(id: number, updateEntity: QueryDeepPartialEntity<MonitoringEntity>): Promise<UpdateResult> {
-    return this.monitoringRepository.update({ id }, updateEntity);
+  public async updateMonitoring(id: number, updateEntity: QueryDeepPartialEntity<MonitoringEntity>): Promise<any> {
+    await this.monitoringRepository.update({ id }, updateEntity);
+    this.monitoringNodes.get(id)?.destroy();
+    this.monitoringNodes.delete(id);
+    this.initNode(id);
+  }
+
+  public getMonitoringName(id: number): Promise<string | undefined> {
+    return this.monitoringRepository.findOne({ where: { id } }).then(monitoring => monitoring?.serverName);
+  }
+
+  public deleteMonitoring(id: number): Promise<any> {
+    this.monitoringNodes.get(id)?.destroy();
+    this.monitoringNodes.delete(id);
+    return this.monitoringRepository.delete({ id });
   }
 
 
   private initNode(id: number): any {
     const monitroingNode = new MonitoringNode(this.monitoringStatuses, this.monitoringRepository, id);
-    this.monitoringNodes.add(monitroingNode);
+    this.monitoringNodes.set(id, monitroingNode);
   }
 }
