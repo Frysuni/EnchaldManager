@@ -1,6 +1,6 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
-import { ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, Events, Interaction, InteractionReplyOptions } from "discord.js";
+import { ApplicationCommandOptionChoiceData, Events, Interaction, InteractionReplyOptions } from "discord.js";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { PauseDto } from "./pause.dto";
 
@@ -11,7 +11,7 @@ import { PauseDto } from "./pause.dto";
   descriptionLocalizations: { ru: 'Поставить мониторинг на паузу.' },
 })
 
-export class DeleteSubcommand {
+export class PauseSubcommand {
   constructor(
     private readonly monitoringService: MonitoringService,
   ) {}

@@ -8,6 +8,7 @@ import { MonitoringService } from './monitoring.service';
 import { MonitoringStatuses } from './monitoring.statuses';
 import { EditSubcommand } from './commands/monitoring/edit/edit.subcommand';
 import { DeleteSubcommand } from './commands/monitoring/delete/delete.subcommand';
+import { PauseSubcommand } from './commands/monitoring/pause/pause.subcommand';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DeleteSubcommand } from './commands/monitoring/delete/delete.subcommand
     CreateSubcommand,
     EditSubcommand,
     DeleteSubcommand,
+    PauseSubcommand,
 
     MonitoringService,
     MonitoringStatuses,
