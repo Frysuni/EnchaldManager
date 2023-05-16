@@ -70,6 +70,14 @@ export class MonitoringService {
     return this.monitoringRepository.delete({ id });
   }
 
+  public async pauseMonitoring(id: number): Promise<boolean> {
+    const monitoring = await this.monitoringRepository.findOne({ where: { id } }) as MonitoringEntity;
+    monitoring.paused = !monitoring.paused;
+    this.monitoringNodes.get(id)?.pause(monitoring.paused);
+    await this.monitoringRepository.update({ id }, { paused: monitoring.paused });
+    return monitoring.paused;
+  }
+
 
   private initNode(id: number): any {
     const monitroingNode = new MonitoringNode(this.monitoringStatuses, this.monitoringRepository, id);

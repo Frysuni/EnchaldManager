@@ -13,7 +13,8 @@ export class MonitoringNode {
   private serverIsOnline: boolean;
   private isRestarting:   boolean;
   private isBackuping:    boolean;
-  private updateSkipTimes = 0;
+  private isPaused:       boolean;
+  private updateSkipTimes     = 0;
 
   private readonly nodeClient = new Client({
     intents: [
@@ -35,6 +36,8 @@ export class MonitoringNode {
     if (!node) return;
     this.node = node;
 
+    this.isPaused = this.node.paused;
+
     await this.nodeClient.login(this.node.token);
 
     this.restartCronJob = new CronJob(node.restartStartCron, this.restartHandler.bind(this), undefined, true, undefined, 'restartHandler', undefined, node.timezoneUtcOffset);
@@ -42,6 +45,10 @@ export class MonitoringNode {
 
     this.updateNodeStatus();
     this.nodeUpdateInterval = setInterval(this.updateNodeStatus.bind(this), node.updateInterval * 1000);
+  }
+
+  public async pause(pause: boolean): Promise<any> {
+    this.isPaused = pause;
   }
 
   public async destroy(): Promise<any> {
@@ -63,6 +70,10 @@ export class MonitoringNode {
 
   private async updateNodeStatus(): Promise<any> {
     if (this.updateSkipTimes > 0) return this.updateSkipTimes--;
+    if (this.isPaused) {
+      const pausedStatus = this.monitoringStatuses.getPaused(this.node.serverName);
+      return this.setStatus(this.node.channelId, this.node.messageId, pausedStatus.embed, pausedStatus.presence);
+    }
 
     const serverStatus = await getServerStatus(this.node.address, this.node.version, this.node.port, this.node.hiddenPlayers.split(','));
 
@@ -91,6 +102,7 @@ export class MonitoringNode {
 
   private restartHandler(): any {
     if (!this.serverIsOnline) return;
+    if (this.isPaused) return;
 
     this.isRestarting = true;
     this.updateSkipTimes++;
@@ -102,6 +114,7 @@ export class MonitoringNode {
   private backupTimeout: NodeJS.Timeout | undefined;
   private backupHandler(): any {
     if (!this.serverIsOnline) return;
+    if (this.isPaused) return;
 
     this.isBackuping = true;
 

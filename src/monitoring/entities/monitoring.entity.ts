@@ -50,4 +50,7 @@ export class MonitoringEntity {
 
   @Column({ nullable: true })
   lastOnline: number;
+
+  @Column({ default: false })
+  paused: boolean;
 }

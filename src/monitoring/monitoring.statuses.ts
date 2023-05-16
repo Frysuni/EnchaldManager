@@ -19,6 +19,13 @@ export class MonitoringStatuses {
     };
   }
 
+  public getPaused(serverName: string): StatusInterface {
+    return {
+      embed: this.getEmbedBase(Colors.Grey, serverName).setFields({ name: `Мониторинг приостановлен.`, value: '\u200B' }),
+      presence: { status: 'invisible', activities: [] },
+    };
+  }
+
   public getRestarting(serverName: string): StatusInterface {
     return {
       embed: this.getEmbedBase(Colors.Yellow, serverName).setFields({ name: `Сервер перезагружается... `, value: '\u200B' }),

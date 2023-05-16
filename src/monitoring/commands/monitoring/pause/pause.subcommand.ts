@@ -1,53 +1,41 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
 import { ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, Events, Interaction, InteractionReplyOptions } from "discord.js";
-import { MonitoringEntity } from "~/monitoring/entities/monitoring.entity";
 import { MonitoringService } from "~/monitoring/monitoring.service";
-import { convertOffsetToMinutes } from "~/monitoring/utils";
-import { baseDtoValidator } from "../common";
-import { EditDto } from "./edit.dto";
+import { PauseDto } from "./pause.dto";
 
 @SubCommand({
-  name: 'edit',
-  nameLocalizations: { ru: 'изменить' },
-  description: 'Edit the settings of an existing monitoring.',
-  descriptionLocalizations: { ru: 'Изменить настройки существующего мониторинга.' },
+  name: 'pause',
+  nameLocalizations: { ru: 'пауза' },
+  description: 'Pause monitoring.',
+  descriptionLocalizations: { ru: 'Поставить мониторинг на паузу.' },
 })
 
-export class EditSubcommand {
+export class DeleteSubcommand {
   constructor(
     private readonly monitoringService: MonitoringService,
   ) {}
 
   @Handler()
   async handler(
-    @IA(SlashCommandPipe) options: EditDto,
+    @IA(SlashCommandPipe) options: PauseDto,
   ): Promise<InteractionReplyOptions | void> {
-    const validationError = baseDtoValidator(options);
-    if (validationError) return validationError;
+    const monitoringName = '**`' + await this.monitoringService.getMonitoringName(options.target) + '`**';
 
-    const address = options.address ? options.address.split(':') : [];
-    const updateEntity: Partial<MonitoringEntity> = {
-      ...options,
-      address: address[0],
-      port: address[0] ? address[1] ? Number(address[1]) : 25565 : undefined,
-      timezoneUtcOffset: options.timezoneUtcOffset ? convertOffsetToMinutes(options.timezoneUtcOffset) : undefined,
-    };
+    const paused = await this.monitoringService.pauseMonitoring(options.target);
 
-    // Delete all undefined values
-    delete (updateEntity as Partial<typeof options>)['target'];
-    for (const key in updateEntity) if (updateEntity[key as keyof MonitoringEntity] === undefined) delete updateEntity[key as keyof MonitoringEntity];
+    const content = paused
+      ? `Мониторинг ${monitoringName} был приостановлен.`
+      : `Работа мониторинга ${monitoringName} возобновлена.`;
 
-    this.monitoringService.updateMonitoring(options.target, updateEntity);
-
-    return { content: 'Успешно обновлено! Мониторинг будет перезапущен в течении нескольких секунд.', ephemeral: true };
+    return { content, ephemeral: true };
   }
 
   @On(Events.InteractionCreate)
   async targetAutocomplete(@IA() interaction: Interaction): Promise<void> {
     if (!interaction.isAutocomplete()) return;
     if (interaction.commandName !== 'monitoring') return;
-    if (interaction.options.getSubcommand() !== 'edit') return;
+    if (interaction.options.getSubcommand() !== 'delete') return;
 
     const focused = interaction.options.getFocused().trim();
 

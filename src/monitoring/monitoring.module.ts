@@ -7,6 +7,7 @@ import { MonitoringEntity } from './entities/monitoring.entity';
 import { MonitoringService } from './monitoring.service';
 import { MonitoringStatuses } from './monitoring.statuses';
 import { EditSubcommand } from './commands/monitoring/edit/edit.subcommand';
+import { DeleteSubcommand } from './commands/monitoring/delete/delete.subcommand';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EditSubcommand } from './commands/monitoring/edit/edit.subcommand';
     MonitoringCommand,
     CreateSubcommand,
     EditSubcommand,
+    DeleteSubcommand,
 
     MonitoringService,
     MonitoringStatuses,

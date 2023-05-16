@@ -3,6 +3,7 @@ import { ApplicationCommandType, PermissionFlagsBits } from 'discord.js';
 import { Injectable } from '@nestjs/common';
 import { CreateSubcommand } from './create/create.subcommand';
 import { EditSubcommand } from './edit/edit.subcommand';
+import { DeleteSubcommand } from './delete/delete.subcommand';
 
 
 @Command({
@@ -15,6 +16,7 @@ import { EditSubcommand } from './edit/edit.subcommand';
   include: [
     CreateSubcommand,
     EditSubcommand,
+    DeleteSubcommand,
   ],
 })
 @Injectable()
