@@ -1,8 +1,8 @@
 {
-  "name": "example",
+  "name": "echnald-manager",
   "author": "Frys",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "LICENSE.TXT",
   "scripts": {
     "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
     "pm2": "npm install -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
