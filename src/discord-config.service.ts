@@ -4,7 +4,7 @@ import {
   DiscordOptionsFactory,
 } from '@discord-nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { GatewayIntentBits } from 'discord.js';
+import { GatewayIntentBits, Partials } from 'discord.js';
 import envConfig from 'envConfig';
 
 @Injectable()
@@ -15,7 +15,6 @@ class DiscordConfigService implements DiscordOptionsFactory {
       autoLogin: true,
       failOnLogin: true,
       shutdownOnAppDestroy: true,
-      // registerCommandOptions: undefined,
       discordClientOptions: {
         intents: [
           // GatewayIntentBits.AutoModerationConfiguration,
@@ -27,7 +26,7 @@ class DiscordConfigService implements DiscordOptionsFactory {
           // GatewayIntentBits.GuildIntegrations,
           // GatewayIntentBits.GuildInvites,
           // GatewayIntentBits.GuildMembers,
-          // GatewayIntentBits.GuildMessageReactions,
+          GatewayIntentBits.GuildMessageReactions,
           // GatewayIntentBits.GuildMessageTyping,
           GatewayIntentBits.GuildMessages,
           // GatewayIntentBits.GuildModeration,
@@ -35,16 +34,16 @@ class DiscordConfigService implements DiscordOptionsFactory {
           // GatewayIntentBits.GuildScheduledEvents,
           // GatewayIntentBits.GuildWebhooks,
           GatewayIntentBits.Guilds,
-          // GatewayIntentBits.MessageContent,
+          GatewayIntentBits.MessageContent,
         ],
         partials: [
-          // Partials.Channel,
-          // Partials.GuildMember,
-          // Partials.GuildScheduledEvent,
-          // Partials.Message,
-          // Partials.Reaction,
-          // Partials.ThreadMember,
-          // Partials.User,
+          Partials.Channel,
+          Partials.GuildMember,
+          Partials.GuildScheduledEvent,
+          Partials.Message,
+          Partials.Reaction,
+          Partials.ThreadMember,
+          Partials.User,
         ],
         allowedMentions: {
           parse: [
@@ -54,7 +53,7 @@ class DiscordConfigService implements DiscordOptionsFactory {
           ],
           repliedUser: true,
         },
-        // presence: { status: 'idle' },
+        presence: { status: 'idle' },
       },
     };
   }
@@ -63,6 +62,9 @@ class DiscordConfigService implements DiscordOptionsFactory {
 export const DiscordModuleRegister = [
   DiscordModule.forRootAsync({
     useClass: DiscordConfigService,
+    setupClientFactory: client => {
+      client.setMaxListeners(Infinity);
+    },
   }),
   DiscordModule.forFeature(),
 ];
