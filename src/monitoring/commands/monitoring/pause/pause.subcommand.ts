@@ -39,18 +39,7 @@ export class DeleteSubcommand {
 
     const focused = interaction.options.getFocused().trim();
 
-    // Without cache.
     const search = () => this.monitoringService.searchMonitorings(focused);
-    // Do you know why?
-    // But because you're a dirty faggot and I'm talking about you, a motherfucker who decided to fuck up to this.
-    // There was no cache here and there will never be, you went to the wrong area at all, asshole, you should not
-    // have appeared here and not ask your stupid questions about caching. You know what? I don't give a fuck about
-    // your database and about you, too, I absolutely don't give a fuck how many requests you will fly,
-    // I would generally send them to you in the fucker, you stinky nit. This is a fucking computer for you,
-    // he doesn't give a fuck if there is caching here or not, he will fuck it all, not that you're a dog bitch.
-    // This fucking command is fucking used only by admins and then fuck once in 10 years, so fuck you with your claims.
-    // Shut your fucking cattle truck, your mother is dead, understand?
-
 
     if (focused.length == 0) return interaction.respond([{ name: 'Начните вводить название...', value: 0 }]);
 
