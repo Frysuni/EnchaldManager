@@ -26,7 +26,6 @@
     "cron": "^2.3.0",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
-    "engine-version": "^1.0.2",
     "env-var": "^7.3.1",
     "minecraft-server-util": "^5.4.2",
     "mysql2": "^3.3.0",
