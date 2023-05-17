@@ -1,6 +1,12 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["./src/**/*.ts", "./scripts/**/*.ts", "./ecosystem.config.js", "./*.ts"],
+  "include": [
+    "./src/**/*.ts",
+    "./scripts/**/*.ts",
+    "./ecosystem.config.js",
+    "./test.ts",
+    "./webpack.config.js",
+  ],
   "compilerOptions": {
     "baseUrl": "./"
   }

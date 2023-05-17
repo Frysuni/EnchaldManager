@@ -10,11 +10,11 @@
   "scripts": {
     "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
     "pm2": "npm install -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
-    "build": "npx nest build -p tsconfig.build.json",
+    "build": "nest build -p tsconfig.build.json && bytenode -c ./dist/bundle.js && rimraf ./dist/bundle.js",
     "dev": "(SET NODE_ENV=dev||export NODE_ENV=dev) && (SET NODE_OPTIONS=--trace-warnings||export NODE_OPTIONS=--trace-warnings) && nest start --watch --debug 9229 --preserveWatchOutput",
-    "start": "(SET NODE_ENV=production||export NODE_ENV=production) && node dist/main",
+    "start": "(SET NODE_ENV=production||export NODE_ENV=production) && bytenode ./dist/bundle.jsc",
     "lint": "eslint \"./src/**/*.ts\" --fix",
-    "typeorm": "npx ts-node -r ./node_modules/tsconfig-paths/register ./node_modules/typeorm/cli -d ./dist/ormconfig.js"
+    "typeorm": "ts-node -r ./node_modules/tsconfig-paths/register ./node_modules/typeorm/cli -d ./dist/ormconfig.js"
   },
   "dependencies": {
     "@discord-nestjs/common": "^5.2.4",
@@ -30,6 +30,7 @@
     "minecraft-server-util": "^5.4.2",
     "mysql2": "^3.3.0",
     "reflect-metadata": "^0.1.13",
+    "rimraf": "^5.0.0",
     "rxjs": "^7.8.1",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.1.1",

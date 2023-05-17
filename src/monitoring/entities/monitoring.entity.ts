@@ -12,7 +12,7 @@ export class MonitoringEntity {
   @Column()
   token: string;
 
-  @Column()
+  @Column('int')
   version: VersionEnum;
 
   @Column()

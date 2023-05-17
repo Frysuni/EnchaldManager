@@ -14,7 +14,7 @@ const ASCII =
   '                                                                  |___/';
 
 void async function bootstrap() {
-  if (envConfig.devMode) {
+  if (!envConfig.devMode) {
     process.stdout.write(
       '\n' + '\n' +
       '\x1b[35m' + ASCII + '\x1b[0m' +
