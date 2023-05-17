@@ -1,7 +1,8 @@
 import { InjectDiscordClient, Once } from '@discord-nestjs/core';
 import envConfig from '@env';
-import { ConsoleLogger, Injectable, LoggerService, Logger } from '@nestjs/common';
+import { ConsoleLogger, Injectable, LoggerService, Logger as System } from '@nestjs/common';
 import { Client, Events } from 'discord.js';
+import { readFileSync } from 'node:fs';
 
 @Injectable()
 export class AppLogger extends ConsoleLogger implements LoggerService {
@@ -12,14 +13,7 @@ export class AppLogger extends ConsoleLogger implements LoggerService {
   }
 
   @Once(Events.ClientReady)
-  public iWillNeverTellYouAboutThis(): any {
-    const message = [27, 91, 51, 53, 109, 1056, 1072, 1079, 1088, 1072, 1073, 1086, 1090, 1072, 1085, 1086, 32, 1089, 1087, 1077, 1094, 1080, 1072, 1083, 1100, 1085, 1086, 32, 1076, 1083, 1103, 32, 69, 110, 99, 104, 97, 108, 100, 32, 40, 77, 97, 121, 32, 50, 48, 50, 51, 41, 27, 91, 48, 109];
-    const context = [65, 117, 116, 104, 111, 114, 70, 114, 121, 115];
-    new Logger().log(
-      String.fromCharCode(...message),
-      String.fromCharCode(...context),
-    );
-
+  public crashHandler(): any {
     process.addListener('unhandledRejection', (error: Error) => this.error(error.message, error.stack ?? ''));
   }
 
