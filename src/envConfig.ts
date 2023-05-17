@@ -11,6 +11,7 @@ const env = from(process.env);
 const main = {
   token: env.get('TOKEN').required().asString(),
   logChannelId: env.get('LOG_CHANNEL_ID').asString(),
+  devMode: env.get('NODE_ENV').asString() === 'dev',
 };
 
 const database: DataSourceOptions = {

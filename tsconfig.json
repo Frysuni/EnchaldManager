@@ -1,6 +1,6 @@
 {
+  "include": ["./src/**/*.ts"],
   "exclude": ["node_modules", "dist", ".vscode"],
-  "include": ["./src/**/*.ts", "ecosystem.config.js"],
   "watchOptions": {
     "watchFile": "fixedPollingInterval",
   },
