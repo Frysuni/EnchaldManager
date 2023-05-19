@@ -9,12 +9,14 @@
   "bin": "./dist/main.js",
   "scripts": {
     "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
-    "pm2": "npm install -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
+    "pm2": "npm i -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
     "build": "nest build -p tsconfig.build.json",
-    "dev": "cross-env NODE_ENV=dev NODE_OPTIONS=--trace-warnings nest start --watch --debug 9229 --preserveWatchOutput",
+    "dev": "cross-env NODE_ENV=dev NODE_OPTIONS=--trace-warnings nest start --watch --debug 9229 --preserveWatchOutput -p tsconfig.dev.json",
     "start": "cross-env NODE_ENV=production node .",
     "lint": "eslint \"./src/**/*.ts\" --fix",
-    "typeorm": "ts-node -r ./node_modules/tsconfig-paths/register ./node_modules/typeorm/cli -d ./dist/ormconfig.js"
+    "typeorm": "ts-node -r tsconfig-paths/register typeorm/cli",
+    "schema:sync": "yarn run typeorm -d ./dist/ormconfig.js schema:sync",
+    "schema:drop": "yarn run typeorm -d ./dist/ormconfig.js schema:drop"
   },
   "dependencies": {
     "@discord-nestjs/common": "^5.2.4",
