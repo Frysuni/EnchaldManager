@@ -2,7 +2,7 @@
   "name": "echnald-manager",
   "author": "Frys",
   "private": true,
-  "license": "LICENSE.TXT",
+  "license": "LICENSE.txt",
   "engines": {
     "node": ">=16.0.0 <19.0.0"
   },
