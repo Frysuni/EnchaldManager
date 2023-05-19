@@ -11,8 +11,8 @@
     "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
     "pm2": "npm install -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
     "build": "nest build -p tsconfig.build.json",
-    "dev": "(SET NODE_ENV=dev||export NODE_ENV=dev) && (SET NODE_OPTIONS=--trace-warnings||export NODE_OPTIONS=--trace-warnings) && nest start --watch --debug 9229 --preserveWatchOutput",
-    "start": "(SET NODE_ENV=production||export NODE_ENV=production) && node .",
+    "dev": "cross-env NODE_ENV=dev NODE_OPTIONS=--trace-warnings nest start --watch --debug 9229 --preserveWatchOutput",
+    "start": "cross-env NODE_ENV=production node .",
     "lint": "eslint \"./src/**/*.ts\" --fix",
     "typeorm": "ts-node -r ./node_modules/tsconfig-paths/register ./node_modules/typeorm/cli -d ./dist/ormconfig.js"
   },
@@ -24,6 +24,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
     "cron": "^2.3.0",
+    "cross-env": "^7.0.3",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
     "env-var": "^7.3.1",
