@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=16.0.0 <19.0.0"
   },
-  "bin": "./dist/bundle.js",
+  "bin": "./dist/main.js",
   "scripts": {
     "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
     "pm2": "npm install -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
