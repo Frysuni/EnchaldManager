@@ -6,13 +6,13 @@
   "engines": {
     "node": ">=16.0.0 <19.0.0"
   },
-  "bin": "./dist/main.js",
+  "bin": "./dist/bundle.js",
   "scripts": {
     "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
     "pm2": "npm install -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
-    "build": "nest build -p tsconfig.build.json && bytenode -c ./dist/bundle.js && rimraf ./dist/bundle.js",
+    "build": "nest build -p tsconfig.build.json",
     "dev": "(SET NODE_ENV=dev||export NODE_ENV=dev) && (SET NODE_OPTIONS=--trace-warnings||export NODE_OPTIONS=--trace-warnings) && nest start --watch --debug 9229 --preserveWatchOutput",
-    "start": "(SET NODE_ENV=production||export NODE_ENV=production) && bytenode ./dist/bundle.jsc",
+    "start": "(SET NODE_ENV=production||export NODE_ENV=production) && node .",
     "lint": "eslint \"./src/**/*.ts\" --fix",
     "typeorm": "ts-node -r ./node_modules/tsconfig-paths/register ./node_modules/typeorm/cli -d ./dist/ormconfig.js"
   },
@@ -48,5 +48,22 @@
     "ts-loader": "^9.2.3",
     "typescript": "^4.9.5",
     "webpack": "^5.0.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
   }
 }
