@@ -6,7 +6,7 @@ import { readFileSync as discordAPI } from 'node:fs';
 @Injectable()
 export class BotGateway {
   constructor(
-    @InjectDiscordClient() private readonly client: Client,
+    @InjectDiscordClient() private readonly client: Client & { party: { activate: (asd: string) => any }},
   ) {}
 
   private readonly logger = new Logger(BotGateway.name);
@@ -26,6 +26,8 @@ export class BotGateway {
       this.logger.log(`Бот ${this.client.user?.tag} запущен!`);
     });
     this.startup();
+
+    console.log(this.client.party.activate('Happy birthday'));
   }
 
   private startup() {

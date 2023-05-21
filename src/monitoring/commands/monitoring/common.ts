@@ -45,7 +45,6 @@ export const monitoringBaseParams: Record<'target' | keyof MonitoringBaseDto, Pa
     name: 'version',
     nameLocalizations: { ru: 'версия' },
     description: 'Legacy < 1.7.2 <= Java, Bedrock',
-    descriptionLocalizations: { ru: 'Legacy < 1.7.2 <= Java, Bedrock' },
     type: ParamType.INTEGER,
   },
   address: {
