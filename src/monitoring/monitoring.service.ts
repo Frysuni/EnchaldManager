@@ -25,8 +25,8 @@ export class MonitoringService {
     return this.monitoringRepository.save(data);
   }
 
-  public async confirmMonitring(id: number, messageId: string): Promise<UpdateResult> {
-    const updateResult = await this.monitoringRepository.update({ id }, { confirmed: true, messageId });
+  public async confirmMonitring(id: number): Promise<UpdateResult> {
+    const updateResult = await this.monitoringRepository.update({ id }, { confirmed: true });
     this.initNode(id);
     return updateResult;
   }

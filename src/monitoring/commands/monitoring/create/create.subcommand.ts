@@ -105,11 +105,7 @@ export class CreateSubcommand {
     if (status === MonitoringRecordStatusEnum.Confirmed) return { content: 'Этот мониторинг уже был подтверждён.', ephemeral: true };
     if (status === MonitoringRecordStatusEnum.Cancelled) return { content: 'Этот мониторинг уже был отменён.', ephemeral: true };
 
-    const embed = new EmbedBuilder().setDescription('Мониторинг создан, идет инициализация...');
-
-    interaction.message.channel.send({ embeds: [embed] }).then(message => {
-      this.monitoringService.confirmMonitring(iid, message.id);
-    });
+    this.monitoringService.confirmMonitring(iid);
 
     return { content: `Данные подтверждены. Мониторинг IID: ${iid} запущен в произовдство.`, ephemeral: true };
   }

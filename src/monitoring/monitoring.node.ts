@@ -35,11 +35,13 @@ export class MonitoringNode {
     const node = await this.monitroingRepository.findOne({ where: { id: this.monitroingId } });
     if (!node) return;
     this.node = node;
-
     this.isPaused = this.node.paused;
 
     await this.nodeClient.login(this.node.token);
+    this.nodeClient.user?.setStatus('invisible');
 
+
+    // TODO: если бот запущен во время бэкапа!
     this.restartCronJob = new CronJob(node.restartStartCron, this.restartHandler.bind(this), undefined, true, undefined, 'restartHandler', undefined, node.timezoneUtcOffset);
     this.backupCronJob  = new CronJob(node.backupStartCron,  this.backupHandler.bind(this),  undefined, true, undefined, 'backupHandler',  undefined, node.timezoneUtcOffset);
 
@@ -53,8 +55,11 @@ export class MonitoringNode {
 
   public async destroy(): Promise<any> {
     const channel = this.nodeClient.channels.cache.get(this.node.channelId) as TextBasedChannel | undefined;
-    const message = await channel?.messages?.fetch(this.node.messageId) as Message<true> | undefined;
-    await message?.delete();
+
+    if (this.node.messageId) {
+      const message = await channel?.messages?.fetch(this.node.messageId) as Message<true> | undefined;
+      await message?.delete();
+    }
 
     clearInterval(this.nodeUpdateInterval);
     clearTimeout(this.backupTimeout);
@@ -72,7 +77,7 @@ export class MonitoringNode {
     if (this.updateSkipTimes > 0) return this.updateSkipTimes--;
     if (this.isPaused) {
       const pausedStatus = this.monitoringStatuses.getPaused(this.node.serverName);
-      return this.setStatus(this.node.channelId, this.node.messageId, pausedStatus.embed, pausedStatus.presence);
+      return this.setStatus(pausedStatus.embed, pausedStatus.presence);
     }
 
     const serverStatus = await getServerStatus(this.node.address, this.node.port, this.node.hiddenPlayers.split(','));
@@ -89,7 +94,7 @@ export class MonitoringNode {
 
     if (!this.isRestarting && !this.isBackuping) {
       const embedAndPresenceData = this.getNodeStatusAssets(serverStatus);
-      this.setStatus(this.node.channelId, this.node.messageId, embedAndPresenceData.embed, embedAndPresenceData.presence);
+      this.setStatus(embedAndPresenceData.embed, embedAndPresenceData.presence);
     }
   }
 
@@ -108,7 +113,7 @@ export class MonitoringNode {
     this.updateSkipTimes++;
 
     const { embed, presence } = this.monitoringStatuses.getRestarting(this.node.serverName);
-    this.setStatus(this.node.channelId, this.node.messageId, embed, presence);
+    this.setStatus(embed, presence);
   }
 
   private backupTimeout: NodeJS.Timeout | undefined;
@@ -119,14 +124,32 @@ export class MonitoringNode {
     this.isBackuping = true;
 
     const { embed, presence } = this.monitoringStatuses.getBackuping(this.node.serverName);
-    this.setStatus(this.node.channelId, this.node.messageId, embed, presence);
+    this.setStatus(embed, presence);
 
     this.backupTimeout = setTimeout(() => this.isBackuping = false, this.node.backupDurationTime * 1000);
   }
 
-  private async setStatus(channelId: string, messageId: string, embed: EmbedBuilder, presence: PresenceData): Promise<any> {
-    const message = await (this.nodeClient.guilds.cache.first()?.channels.cache.get(channelId) as TextBasedChannel).messages.fetch(messageId) as Message<true>;
+  private async setStatus(embed: EmbedBuilder, presence: PresenceData): Promise<any> {
+    const messageId = await this.getMessageId();
+
+    const message = await (this.nodeClient.guilds.cache.first()?.channels.cache.get(this.node.channelId) as TextBasedChannel).messages.fetch(messageId) as Message<true>;
     this.nodeClient?.user?.setPresence(presence);
     message.edit({ embeds: [embed] });
+  }
+
+  private async getMessageId(): Promise<string> {
+    if (this.node.messageId) return this.node.messageId;
+
+    const embed = new EmbedBuilder().setDescription('Мониторинг создан, идет инициализация...');
+
+    const channel = this.nodeClient.channels.cache.get(this.node.channelId) as TextBasedChannel | undefined;
+    if (!channel) throw `Мониторинг **${this.node.serverName}** не обнаружил канал с id ${this.node.channelId}!\nВыполните команду \`/edit ${this.node.serverName}\` для восстановления канала!`;
+
+    const { id } = await channel.send({ embeds: [embed] });
+
+    await this.monitroingRepository.update({ id: this.node.id }, { messageId: id });
+    this.node = await this.monitroingRepository.findOne({ where: { id: this.node.id } }) as MonitoringEntity;
+
+    return id;
   }
 }

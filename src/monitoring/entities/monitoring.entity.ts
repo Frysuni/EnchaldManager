@@ -39,7 +39,7 @@ export class MonitoringEntity {
   channelId: string;
 
   @Column({ nullable: true })
-  messageId: string;
+  messageId?: string;
 
   @Column({ default: false })
   confirmed: boolean;
