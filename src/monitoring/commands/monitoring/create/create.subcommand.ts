@@ -3,7 +3,7 @@ import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Colors, EmbedBuilder, Events, Interaction, InteractionReplyOptions } from "discord.js";
 import { MonitoringRecordStatusEnum } from "~/monitoring/enums/monitoringRecordStatus.enum";
 import { MonitoringService } from "~/monitoring/monitoring.service";
-import { convertMinutesToOffset, convertOffsetToMinutes } from "~/monitoring/utils";
+import { getTimezone } from "~/monitoring/utils";
 import { baseDtoValidator } from "../common";
 import { CreateDto } from "./create.dto";
 
@@ -31,8 +31,8 @@ export class CreateSubcommand {
     const validationError = baseDtoValidator(options);
     if (validationError) return validationError;
 
-    let timezoneUtcOffset = -new Date().getTimezoneOffset();
-    if (options.timezoneUtcOffset) timezoneUtcOffset = convertOffsetToMinutes(options.timezoneUtcOffset);
+    const timezone = getTimezone(options.timezoneUtcOffset ?? -new Date().getTimezoneOffset());
+    if (!timezone) return { ephemeral: true, content: `Не найдена временная зона для **${options.timezoneUtcOffset}**` };
 
     const address = options.address.split(':');
     const record = await this.monitoringService.createMonitoring({
@@ -45,7 +45,8 @@ export class CreateSubcommand {
       backupDurationTime: options.backupDurationTime,
       hiddenPlayers:      options.hiddenPlayers,
       updateInterval:     options.updateInterval,
-      timezoneUtcOffset:  timezoneUtcOffset,
+      timezoneUtcOffset:  timezone.utcOffsetInMinutes,
+      timezone:           timezone.name,
       channelId:          interaction.channelId,
     });
 
@@ -68,7 +69,7 @@ export class CreateSubcommand {
           `Время длительности бэкапа: **\`${record.backupDurationTime}\`**\n` +
           `Скрытые игроки:                ${formattedHiddenPlayers}\n` +
           `Интервал обновления:       **\`${record.updateInterval}\`**\n` +
-          `Смещение часового пояса:   **\`${convertMinutesToOffset(record.timezoneUtcOffset)}\`** **\`(${record.timezoneUtcOffset})\`**`,
+          `Часовой пояс:              **\`${record.timezone} (UTC${timezone.utcOffset})\`**`,
       })
       .setFooter({ text: 'Данные были валидированы только на наличие грубых или синтаксических ошибок, но тонкости проверены не были. Бот гарантирует неправильную работу при указании неверных данных!' });
 

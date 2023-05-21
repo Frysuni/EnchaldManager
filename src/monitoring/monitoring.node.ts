@@ -1,4 +1,5 @@
 import { CronJob } from 'cron';
+import { parseExpression } from 'cron-parser';
 import { Client, EmbedBuilder, GatewayIntentBits, Message, PresenceData, TextBasedChannel } from "discord.js";
 import { Repository } from "typeorm";
 import { MonitoringEntity } from "./entities/monitoring.entity";
@@ -40,10 +41,14 @@ export class MonitoringNode {
     await this.nodeClient.login(this.node.token);
     this.nodeClient.user?.setStatus('invisible');
 
-
-    // TODO: если бот запущен во время бэкапа!
     this.restartCronJob = new CronJob(node.restartStartCron, this.restartHandler.bind(this), undefined, true, undefined, 'restartHandler', undefined, node.timezoneUtcOffset);
     this.backupCronJob  = new CronJob(node.backupStartCron,  this.backupHandler.bind(this),  undefined, true, undefined, 'backupHandler',  undefined, node.timezoneUtcOffset);
+
+    // если бот запущен во время бэкапа
+    const cronExpression = parseExpression(node.backupStartCron, { tz: this.node.timezone });
+    const completedAt = cronExpression.prev().getTime() + this.node.backupDurationTime * 60 * 1000;
+    if (completedAt >= Date.now()) this.backupHandler(completedAt - Date.now());
+    // S - - - - - N - - - C
 
     this.updateNodeStatus();
     this.nodeUpdateInterval = setInterval(this.updateNodeStatus.bind(this), node.updateInterval * 1000);
@@ -117,7 +122,7 @@ export class MonitoringNode {
   }
 
   private backupTimeout: NodeJS.Timeout | undefined;
-  private backupHandler(): any {
+  private backupHandler(elapsedTime?: number): any {
     if (!this.serverIsOnline) return;
     if (this.isPaused) return;
 
@@ -126,7 +131,7 @@ export class MonitoringNode {
     const { embed, presence } = this.monitoringStatuses.getBackuping(this.node.serverName);
     this.setStatus(embed, presence);
 
-    this.backupTimeout = setTimeout(() => this.isBackuping = false, this.node.backupDurationTime * 1000);
+    this.backupTimeout = setTimeout(() => this.isBackuping = false, elapsedTime ?? this.node.backupDurationTime * 1000);
   }
 
   private async setStatus(embed: EmbedBuilder, presence: PresenceData): Promise<any> {

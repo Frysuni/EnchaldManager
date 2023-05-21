@@ -36,6 +36,9 @@ export class MonitoringEntity {
   timezoneUtcOffset: number;
 
   @Column()
+  timezone: string;
+
+  @Column()
   channelId: string;
 
   @Column({ nullable: true })

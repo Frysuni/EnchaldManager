@@ -25,6 +25,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
     "cron": "^2.3.0",
+    "cron-parser": "^4.8.1",
     "cross-env": "^7.0.3",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",

@@ -1,4 +1,5 @@
 import { ping, PingOptions } from 'minecraft-protocol';
+import { resolve } from 'path';
 import { ServerStatusEnum } from "./enums/serverStatus.enum";
 
 export type ServerStatusType<Started extends boolean = boolean> =
@@ -80,22 +81,13 @@ export function parseAndDivideAndLimitPlayers(rawPlayers?: string[]): [string[],
   ];
 }
 
-export function convertOffsetToMinutes(offset: string) {
-  const [timezoneUtcOffsetHours, timezoneUtcOffsetMinutes] = offset.split(':').map(Number);
-  const totalMinutes = timezoneUtcOffsetHours * 60 + timezoneUtcOffsetMinutes;
-  return offset.startsWith('-') ? -totalMinutes : totalMinutes;
-}
+type RawTimezones = [{ n: string, o: number, u: string }];
+type Timezone = { utcOffsetInMinutes: number, name: string, utcOffset: string };
 
-export function convertMinutesToOffset(minutes: number) {
-  const absMinutes = Math.abs(minutes);
-
-  const hours = Math.floor(absMinutes / 60);
-  const mins = absMinutes % 60;
-
-  const formattedHours = String(hours).padStart(2, '0');
-  const formattedMins = String(mins).padStart(2, '0');
-
-  const offset = (minutes < 0 ? '-' : '+') + formattedHours + ':' + formattedMins;
-
-  return offset;
+export function getTimezone(offset: string | number): Timezone | undefined {
+  const timezones = require(resolve(__dirname, '../', '../', 'timezones.json')) as RawTimezones;
+  const timezone = timezones.find(timezone => timezone.o == offset || timezone.u == offset);
+  return timezone
+    ? { utcOffsetInMinutes: timezone.o, name: timezone.n, utcOffset: timezone.u }
+    : undefined;
 }
