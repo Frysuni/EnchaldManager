@@ -1,8 +1,7 @@
 import { InjectDiscordClient, Once } from '@discord-nestjs/core';
 import envConfig from '@env';
-import { ConsoleLogger, Injectable, LoggerService, Logger as System } from '@nestjs/common';
+import { ConsoleLogger, Injectable, LoggerService } from '@nestjs/common';
 import { Client, Events } from 'discord.js';
-import { readFileSync } from 'node:fs';
 
 @Injectable()
 export class AppLogger extends ConsoleLogger implements LoggerService {
