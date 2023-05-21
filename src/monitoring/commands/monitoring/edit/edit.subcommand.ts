@@ -1,6 +1,6 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
-import { ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, Events, Interaction, InteractionReplyOptions } from "discord.js";
+import { ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, CommandInteraction, Events, Interaction, InteractionReplyOptions } from "discord.js";
 import { MonitoringEntity } from "~/monitoring/entities/monitoring.entity";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { convertOffsetToMinutes } from "~/monitoring/utils";
@@ -22,6 +22,7 @@ export class EditSubcommand {
   @Handler()
   async handler(
     @IA(SlashCommandPipe) options: EditDto,
+    @IA() interaction: CommandInteraction,
   ): Promise<InteractionReplyOptions | void> {
     const validationError = baseDtoValidator(options);
     if (validationError) return validationError;
@@ -29,6 +30,7 @@ export class EditSubcommand {
     const address = options.address ? options.address.split(':') : [];
     const updateEntity: Partial<MonitoringEntity> = {
       ...options,
+      channelId: interaction.channelId,
       address: address[0],
       port: address[0] ? address[1] ? Number(address[1]) : 25565 : undefined,
       timezoneUtcOffset: options.timezoneUtcOffset ? convertOffsetToMinutes(options.timezoneUtcOffset) : undefined,
