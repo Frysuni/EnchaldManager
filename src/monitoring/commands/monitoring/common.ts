@@ -1,12 +1,10 @@
 import { ParamType } from "@discord-nestjs/core";
 import { ParamOptions } from "@discord-nestjs/core/dist/decorators/option/param/param-options";
 import { InteractionReplyOptions } from "discord.js";
-import { VersionEnum } from "~/monitoring/enums/version.enum";
 
 export interface MonitoringBaseDto {
   readonly serverName:         string;
   readonly token:              string;
-  readonly version:            VersionEnum;
   readonly address:            string;
   readonly restartStartCron:   string;
   readonly backupStartCron:    string;
@@ -40,12 +38,6 @@ export const monitoringBaseParams: Record<'target' | keyof MonitoringBaseDto, Pa
     description: 'Token of the bot responsible for this monitoring.',
     descriptionLocalizations: { ru: 'Токен бота, отвечающего за этот мониторинг.' },
     type: ParamType.STRING,
-  },
-  version: {
-    name: 'version',
-    nameLocalizations: { ru: 'версия' },
-    description: 'Legacy < 1.7.2 <= Java, Bedrock',
-    type: ParamType.INTEGER,
   },
   address: {
     name: 'address',

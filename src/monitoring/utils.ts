@@ -1,48 +1,43 @@
-import { BedrockStatusResponse, FullQueryResponse, JavaStatusLegacyResponse, JavaStatusResponse, queryFull, status, statusBedrock, statusLegacy } from "minecraft-server-util";
+import { ping, PingOptions } from 'minecraft-protocol';
 import { ServerStatusEnum } from "./enums/serverStatus.enum";
-import { VersionEnum } from "./enums/version.enum";
 
-export type ServerStatusType = { status: ServerStatusEnum.Stopped } | { status: ServerStatusEnum.Started, online: string, players?: string[] };
-export async function getServerStatus(address: string, version: VersionEnum, port: number, hiddenPlayers: string[]): Promise<ServerStatusType> {
-  let getStatus;
-  switch (version) {
-    case VersionEnum.Legacy:
-      getStatus = statusLegacy;
-      break;
-    case VersionEnum.Java:
-      getStatus = status;
-      break;
-    case VersionEnum.Bedrock:
-      getStatus = statusBedrock;
-      break;
-  }
-  const res = await queryFull('dragon.enchald.com').catch(console.log) as FullQueryResponse | false;
-  console.log(res);
+export type ServerStatusType<Started extends boolean = boolean> =
+  Started extends true
+    ? { status: ServerStatusEnum.Started, players?: string[], playersMax: number, playersCount: number }
+    : { status: ServerStatusEnum.Stopped };
+
+export async function getServerStatus(address: string, port: number, hiddenPlayers: string[]): Promise<ServerStatusType> {
+  const options: PingOptions = {
+    closeTimeout: 2000,
+    noPongTimeout: 2000,
+    host: address, port,
+  };
+
+  const res = await ping(options).catch(() => false) as Awaited<ReturnType<typeof ping>> | false;
   if (!res) return { status: ServerStatusEnum.Stopped };
 
   let hiddenPlayersCount = 0;
 
-  const players = res.players.list
-    ? res.players.list
-      .map(player => player)
-      .filter(name => {
-        if (
-          hiddenPlayers.includes(name) ||
-          name.includes('версия игры') ||
-          name.includes('game version')
-        ) {
-          ++hiddenPlayersCount;
-          return false;
-        }
-        return true;
-      })
-      .sort((a, b) => a.localeCompare(b))
+  const players = 'players' in res && res.players.sample
+    ? res.players.sample
+      .map(player => player.name)
+      .filter(playerName => hiddenPlayers.includes(playerName) ? !++hiddenPlayersCount : true)
+      .sort((nameA, nameB) => nameA.localeCompare(nameB))
     : undefined;
+
+  const playersMax = 'players' in res
+    ? res.players.max - hiddenPlayersCount
+    : res.maxPlayers - hiddenPlayersCount;
+
+  const playersCount = 'players' in res
+    ? res.players.online - hiddenPlayersCount
+    : res.playerCount - hiddenPlayersCount;
 
   return {
     status: ServerStatusEnum.Started,
-    online: `${res.players.online - hiddenPlayersCount}/${res.players.max - hiddenPlayers.length}`,
     players,
+    playersMax,
+    playersCount,
   };
 }
 

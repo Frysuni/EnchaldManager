@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { VersionEnum } from "../enums/version.enum";
 
 @Entity('monitoring')
 export class MonitoringEntity {
@@ -11,9 +10,6 @@ export class MonitoringEntity {
 
   @Column()
   token: string;
-
-  @Column('int')
-  version: VersionEnum;
 
   @Column()
   address: string;

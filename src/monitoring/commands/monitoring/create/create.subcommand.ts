@@ -2,7 +2,6 @@ import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Colors, EmbedBuilder, Events, Interaction, InteractionReplyOptions } from "discord.js";
 import { MonitoringRecordStatusEnum } from "~/monitoring/enums/monitoringRecordStatus.enum";
-import { VersionEnum } from "~/monitoring/enums/version.enum";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { convertMinutesToOffset, convertOffsetToMinutes } from "~/monitoring/utils";
 import { baseDtoValidator } from "../common";
@@ -18,7 +17,6 @@ const  cancelButtonCustomIdConstant = 'commands.monitoring.create.cancel';
   description: 'Create a new monitoring and send it to this channel.',
   descriptionLocalizations: { ru: 'Создать новый мониторинг и отправить его в этот канал.' },
 })
-
 export class CreateSubcommand {
   constructor(
     private readonly monitoringService: MonitoringService,
@@ -40,7 +38,6 @@ export class CreateSubcommand {
     const record = await this.monitoringService.createMonitoring({
       serverName:         options.serverName,
       token:              options.token,
-      version:            options.version,
       address:            address[0],
       port:               address[1] ? Number(address[1]) : 25565,
       restartStartCron:   options.restartStartCron,
@@ -64,7 +61,6 @@ export class CreateSubcommand {
         value:
           `Имя сервера:               **\`${record.serverName}\`**\n` +
           `Токен:                     **\`${record.token.slice(0, 4)}...${record.token.slice(-4)}\`**\n` +
-          `Версия:                    **\`${VersionEnum[record.version]}\`**\n` +
           `Адрес:                     **\`${record.address}\`**\n` +
           `Порт:                      **\`${record.port}\`**\n` +
           `Cron начала рестарта:      **\`${record.restartStartCron}\`**\n` +

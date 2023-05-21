@@ -75,7 +75,7 @@ export class MonitoringNode {
       return this.setStatus(this.node.channelId, this.node.messageId, pausedStatus.embed, pausedStatus.presence);
     }
 
-    const serverStatus = await getServerStatus(this.node.address, this.node.version, this.node.port, this.node.hiddenPlayers.split(','));
+    const serverStatus = await getServerStatus(this.node.address, this.node.port, this.node.hiddenPlayers.split(','));
 
     if (serverStatus.status == ServerStatusEnum.Started) {
       this.isRestarting = false;
@@ -96,7 +96,7 @@ export class MonitoringNode {
   private getNodeStatusAssets(serverStatus: ServerStatusType) {
     const restartAt = ~~(this.restartCronJob.nextDate().toMillis() / 1000);
     if (serverStatus.status === ServerStatusEnum.Stopped) return this.monitoringStatuses.getServerStopped(this.node.serverName, this.node.lastOnline);
-    return this.monitoringStatuses.getServerStarted(this.node.serverName, serverStatus.online, serverStatus.players, restartAt);
+    return this.monitoringStatuses.getServerStarted(this.node.serverName, serverStatus, restartAt);
   }
 
 

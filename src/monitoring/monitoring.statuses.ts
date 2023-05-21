@@ -1,6 +1,6 @@
 import { IA, InjectDiscordClient, On, Once } from "@discord-nestjs/core";
 import { ActivityType, Client, Colors, EmbedBuilder, Events, GuildEmoji, PresenceData } from "discord.js";
-import { parseAndDivideAndLimitPlayers } from "./utils";
+import { parseAndDivideAndLimitPlayers, ServerStatusType } from "./utils";
 
 interface StatusInterface {
   presence: PresenceData
@@ -47,11 +47,12 @@ export class MonitoringStatuses {
     };
   }
 
-  public getServerStarted(serverName: string, online: string, rawPlayers: string[] | undefined, restartAtInSeconds: number): StatusInterface {
-    const noOneIsOnline = online.startsWith('0');
-    const title = noOneIsOnline ? 'Никого нет онлайн' : `Онлайн: ${online} игроков.`;
+  public getServerStarted(serverName: string, serverStatus: ServerStatusType<true>, restartAtInSeconds: number): StatusInterface {
+    const noOneIsOnline = serverStatus.playersCount === 0;
+    const onlineStringified = `${serverStatus.playersCount}/${serverStatus.playersMax}`;
+    const title = noOneIsOnline ? 'Никого нет онлайн' : `Онлайн: ${onlineStringified} игроков.`;
 
-    const [firstPlayersThird, secondPlayersThird, thirdPlayersThird] = parseAndDivideAndLimitPlayers(rawPlayers);
+    const [firstPlayersThird, secondPlayersThird, thirdPlayersThird] = parseAndDivideAndLimitPlayers(serverStatus.players);
 
     const embed = this.getEmbedBase(Colors.Green, serverName);
 
@@ -85,7 +86,7 @@ export class MonitoringStatuses {
     const presence: PresenceData = {
       activities: [{
         type: ActivityType.Watching,
-        name: `${online} игроков.`,
+        name: `${onlineStringified} игроков.`,
       }],
       status: noOneIsOnline ? 'idle' : 'online',
     };

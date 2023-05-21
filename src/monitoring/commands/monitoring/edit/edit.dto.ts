@@ -1,5 +1,4 @@
-import { Choice, Param, ParamType } from "@discord-nestjs/core";
-import { VersionEnum } from "~/monitoring/enums/version.enum";
+import { Param } from "@discord-nestjs/core";
 import { MonitoringBaseDto, monitoringBaseParams } from "../common";
 
 type PartialMonitoringBaseDtoWithTargerType = Partial<MonitoringBaseDto> & { target: number }
@@ -13,10 +12,6 @@ export class EditDto implements PartialMonitoringBaseDtoWithTargerType {
 
   @Param({ ...monitoringBaseParams.token, required: false })
   token?: string;
-
-  @Choice(VersionEnum)
-  @Param({ ...monitoringBaseParams.version, required: false })
-  version?: VersionEnum;
 
   @Param({ ...monitoringBaseParams.address, required: false })
   address?: string;
