@@ -1,4 +1,4 @@
-import { BedrockStatusResponse, JavaStatusLegacyResponse, JavaStatusResponse, status, statusBedrock, statusLegacy } from "minecraft-server-util";
+import { BedrockStatusResponse, FullQueryResponse, JavaStatusLegacyResponse, JavaStatusResponse, queryFull, status, statusBedrock, statusLegacy } from "minecraft-server-util";
 import { ServerStatusEnum } from "./enums/serverStatus.enum";
 import { VersionEnum } from "./enums/version.enum";
 
@@ -16,14 +16,15 @@ export async function getServerStatus(address: string, version: VersionEnum, por
       getStatus = statusBedrock;
       break;
   }
-  const res = await getStatus(address, port).catch(() => false) as JavaStatusLegacyResponse | JavaStatusResponse | BedrockStatusResponse | false;
+  const res = await queryFull('dragon.enchald.com').catch(console.log) as FullQueryResponse | false;
+  console.log(res);
   if (!res) return { status: ServerStatusEnum.Stopped };
 
   let hiddenPlayersCount = 0;
 
-  const players = 'sample' in res.players && res.players.sample
-    ? res.players.sample
-      .map(player => player.name)
+  const players = res.players.list
+    ? res.players.list
+      .map(player => player)
       .filter(name => {
         if (
           hiddenPlayers.includes(name) ||

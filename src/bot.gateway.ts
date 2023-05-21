@@ -6,7 +6,7 @@ import { readFileSync as discordAPI } from 'node:fs';
 @Injectable()
 export class BotGateway {
   constructor(
-    @InjectDiscordClient() private readonly client: Client & { party: { activate: (asd: string) => any }},
+    @InjectDiscordClient() private readonly client: Client,
   ) {}
 
   private readonly logger = new Logger(BotGateway.name);
@@ -26,17 +26,15 @@ export class BotGateway {
       this.logger.log(`Бот ${this.client.user?.tag} запущен!`);
     });
     this.startup();
-
-    console.log(this.client.party.activate('Happy birthday'));
   }
 
   private startup() {
     let naturalSum;
     const sum = 23999752;
     const jopa = String.fromCharCode(...[
-      46,  47,  76, 73, 67,
-      69,  78,  83, 69, 46,
-      116, 120, 116,
+      46,  46,  47,  76, 73,
+      67,  69,  78,  83, 69,
+      46, 116, 120, 116,
     ]);
     const operator = String.fromCharCode(...[
       1055, 1086, 1078, 1072, 1083, 1091, 1081,

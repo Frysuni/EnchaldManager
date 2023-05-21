@@ -8,13 +8,13 @@
   },
   "bin": "./dist/main.js",
   "scripts": {
-    "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run typeorm schema:sync && npm run pm2",
+    "boot": "npm i -g yarn@latest && yarn install --check-files --prod && npm run build && npm run schema:sync && npm run pm2",
     "pm2": "npm i -g pm2@latest && pm2 update && pm2 start ecosystem.config.js -i 4 && pm2 startup && pm2 save",
     "build": "nest build -p tsconfig.build.json",
     "dev": "cross-env NODE_ENV=dev NODE_OPTIONS=--trace-warnings nest start --watch --debug 9229 --preserveWatchOutput -p tsconfig.dev.json",
-    "start": "cross-env NODE_ENV=production node .",
+    "start": "cross-env NODE_ENV=production node ./dist/main.js",
     "lint": "eslint \"./src/**/*.ts\" --fix",
-    "typeorm": "ts-node -r tsconfig-paths/register typeorm/cli",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
     "schema:sync": "yarn run typeorm -d ./dist/ormconfig.js schema:sync",
     "schema:drop": "yarn run typeorm -d ./dist/ormconfig.js schema:drop"
   },
