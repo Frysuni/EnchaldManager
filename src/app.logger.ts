@@ -26,6 +26,11 @@ export class AppLogger extends ConsoleLogger implements LoggerService {
     if (!envConfig.logChannelId) return;
     const logChannel = this.client.guilds.cache.first()?.channels.cache.get(envConfig.logChannelId);
     if (!logChannel?.isTextBased()) return;
-    logChannel.send({ content: `**Возникла ошибка!** \n**\`${message ?? 'UNKNOWN'}\`**\n${trace}\n\n\n **И так, что делать?**\nТакого не должно быть. Есть это - значит есть проблема в коде. Окей, я защитил только что себя от выключения, так что если эта ошибка не повторяется в течении 120 секунд, то в принципе, не страшно. Только в случае, если я все еще на Enchald и нахожусь на гарантии - пишите Frys от авторизированного лица. Вам нужно предоставить ошибку, что выше, а так же, желательно, подробную информацию о том, как и при каких обстоятельствах это произошло.` });
+
+    let content = '**Ошибка!**\n';
+    content += '**`' + message ?? '{UNKNOWN}' + '`**';
+    if (trace) content += `\n${trace}`;
+
+    logChannel.send({ content });
   }
 }
