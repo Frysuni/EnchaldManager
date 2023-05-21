@@ -3,7 +3,7 @@ import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
 import { ApplicationCommandOptionChoiceData, ChatInputCommandInteraction, CommandInteraction, Events, Interaction, InteractionReplyOptions } from "discord.js";
 import { MonitoringEntity } from "~/monitoring/entities/monitoring.entity";
 import { MonitoringService } from "~/monitoring/monitoring.service";
-import { convertOffsetToMinutes } from "~/monitoring/utils";
+import { getTimezone } from "~/monitoring/utils";
 import { baseDtoValidator } from "../common";
 import { EditDto } from "./edit.dto";
 
@@ -27,13 +27,17 @@ export class EditSubcommand {
     const validationError = baseDtoValidator(options);
     if (validationError) return validationError;
 
+    const timezone = getTimezone(options.timezoneUtcOffset ?? -new Date().getTimezoneOffset());
+    if (!timezone) return { ephemeral: true, content: `Не найдена временная зона для **${options.timezoneUtcOffset}**` };
+
     const address = options.address ? options.address.split(':') : [];
     const updateEntity: Partial<MonitoringEntity> = {
       ...options,
       channelId: interaction.channelId,
       address: address[0],
       port: address[0] ? address[1] ? Number(address[1]) : 25565 : undefined,
-      timezoneUtcOffset: options.timezoneUtcOffset ? convertOffsetToMinutes(options.timezoneUtcOffset) : undefined,
+      timezoneUtcOffset: options.timezoneUtcOffset ? timezone.utcOffsetInMinutes : undefined,
+      timezone: options.timezoneUtcOffset ? timezone.name : undefined,
     };
 
     // Delete all undefined values
