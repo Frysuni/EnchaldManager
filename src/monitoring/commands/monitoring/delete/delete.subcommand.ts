@@ -1,6 +1,7 @@
 import { SlashCommandPipe } from "@discord-nestjs/common";
 import { Handler, IA, On, SubCommand } from "@discord-nestjs/core";
 import { ActionRowBuilder, ApplicationCommandOptionChoiceData, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Colors, EmbedBuilder, Events, Interaction, InteractionReplyOptions } from "discord.js";
+import { measureMemory } from "node:vm";
 import { MonitoringService } from "~/monitoring/monitoring.service";
 import { DeleteDto } from "./delete.dto";
 
@@ -30,7 +31,7 @@ export class DeleteSubcommand {
 
     const embed = new EmbedBuilder()
       .setColor(Colors.DarkRed)
-      .setDescription(`Подтвердите __удаление__ мониторинга **\`${monitoringName}\`**`);
+      .setDescription(`Подтвердите удаление мониторинга **\`${monitoringName}\`**`);
 
     const buttonsRow = new ActionRowBuilder<ButtonBuilder>()
       .setComponents(
@@ -87,9 +88,10 @@ export class DeleteSubcommand {
     if (!interaction.isButton()) return;
     if (interaction.customId !== confirmButtonCustomIdConstant) return;
 
-    const deleteRequest = this.monitoringDeleteRequests.get(interaction.message.id);
+    const id = interaction.message.interaction?.id ?? '';
+    const deleteRequest = this.monitoringDeleteRequests.get(id);
     if (!deleteRequest) return { content: 'Этот запрос на удаление более не действителен.', ephemeral: true };
-    this.monitoringDeleteRequests.delete(interaction.message.id);
+    this.monitoringDeleteRequests.delete(id);
 
     this.monitoringService.deleteMonitoring(deleteRequest.id);
 
@@ -102,9 +104,10 @@ export class DeleteSubcommand {
     if (!interaction.isButton()) return;
     if (interaction.customId !== cancelButtonCustomIdConstant) return;
 
-    const deleteRequest = this.monitoringDeleteRequests.get(interaction.message.id);
+    const id = interaction.message.interaction?.id ?? '';
+    const deleteRequest = this.monitoringDeleteRequests.get(id);
     if (!deleteRequest) return { content: 'Этот запрос на удаление более не действителен.', ephemeral: true };
-    this.monitoringDeleteRequests.delete(interaction.message.id);
+    this.monitoringDeleteRequests.delete(id);
 
     return { content: `Отменено. Мониторинг \`${deleteRequest.serverName}\` **не** был удалён.`, ephemeral: true };
   }

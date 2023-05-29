@@ -98,14 +98,9 @@ export const monitoringBaseParams: Record<'target' | keyof MonitoringBaseDto, Pa
 export function baseDtoValidator(options: Partial<MonitoringBaseDto>) {
   const timezoneUtcOffsetRegex = /^((-1[0-2]|\+1[0-4])|(-0[0-9]|\+0[0-9])):(00|15|30|45)$/;
   const addressRegex           = /^(?:[\w-]+\.)+[\w-]{2,}(?::\d+)?|(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?$/i;
-  const cronRegex              = /^(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)\s+(\*|[0-9-\/]+)(\s+(\*|[0-9-\/]+))?$/;
 
   const reply = (content: string): InteractionReplyOptions => ({ content, ephemeral: true });
 
-  if (options.restartStartCron && !cronRegex.test(options.restartStartCron)) {
-    return reply('Время перезагрузки указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
-  if (options.backupStartCron && !cronRegex.test(options.backupStartCron)) {
-    return reply('Время бекапа указано неверно. Проверьте синтаксис или воспользуйтесь https://crontab.guru/'); }
   if (options.address && !addressRegex.test(options.address)) {
     return reply('Адрес указан неверно.'); }
   if (options.timezoneUtcOffset && !timezoneUtcOffsetRegex.test(options.timezoneUtcOffset)) {

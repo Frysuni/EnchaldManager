@@ -52,7 +52,7 @@ export class MonitoringStatuses {
     const onlineStringified = `${serverStatus.playersCount}/${serverStatus.playersMax}`;
     const title = noOneIsOnline ? 'Никого нет онлайн' : `Онлайн: ${onlineStringified} игроков.`;
 
-    const [firstPlayersThird, secondPlayersThird, thirdPlayersThird] = parseAndDivideAndLimitPlayers(serverStatus.players);
+    const [firstPlayersThird, secondPlayersThird] = parseAndDivideAndLimitPlayers(serverStatus.players);
 
     const embed = this.getEmbedBase(Colors.Green, serverName);
 
@@ -75,18 +75,10 @@ export class MonitoringStatuses {
       });
     }
 
-    if (thirdPlayersThird.length) {
-      embed.addFields({
-        name: '\u200B',
-        value: thirdPlayersThird.join(''),
-        inline: true,
-      });
-    }
-
     const presence: PresenceData = {
       activities: [{
         type: ActivityType.Watching,
-        name: `${onlineStringified} игроков.`,
+        name: `на ${onlineStringified} игроков.`,
       }],
       status: noOneIsOnline ? 'idle' : 'online',
     };

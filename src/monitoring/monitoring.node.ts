@@ -39,16 +39,17 @@ export class MonitoringNode {
     this.isPaused = this.node.paused;
 
     await this.nodeClient.login(this.node.token);
+    await new Promise(res => setTimeout(res, 500));
+
     this.nodeClient.user?.setStatus('invisible');
 
     this.restartCronJob = new CronJob(node.restartStartCron, this.restartHandler.bind(this), undefined, true, undefined, 'restartHandler', undefined, node.timezoneUtcOffset);
-    this.backupCronJob  = new CronJob(node.backupStartCron,  this.backupHandler.bind(this),  undefined, true, undefined, 'backupHandler',  undefined, node.timezoneUtcOffset);
+    this.backupCronJob  = new CronJob(node.backupStartCron,  this.backupHandler .bind(this), undefined, true, undefined, 'backupHandler',  undefined, node.timezoneUtcOffset);
 
     // если бот запущен во время бэкапа
     const cronExpression = parseExpression(node.backupStartCron, { tz: this.node.timezone });
     const completedAt = cronExpression.prev().getTime() + this.node.backupDurationTime * 60 * 1000;
     if (completedAt >= Date.now()) this.backupHandler(completedAt - Date.now());
-    // S - - - - - N - - - C
 
     this.updateNodeStatus();
     this.nodeUpdateInterval = setInterval(this.updateNodeStatus.bind(this), node.updateInterval * 1000);
@@ -56,12 +57,13 @@ export class MonitoringNode {
 
   public async pause(pause: boolean): Promise<any> {
     this.isPaused = pause;
+    this.updateNodeStatus();
   }
 
-  public async destroy(): Promise<any> {
+  public async destroy(withMessage: boolean): Promise<any> {
     const channel = this.nodeClient.channels.cache.get(this.node.channelId) as TextBasedChannel | undefined;
 
-    if (this.node.messageId) {
+    if (withMessage && this.node.messageId) {
       const message = await channel?.messages?.fetch(this.node.messageId) as Message<true> | undefined;
       await message?.delete();
     }
@@ -123,7 +125,6 @@ export class MonitoringNode {
 
   private backupTimeout: NodeJS.Timeout | undefined;
   private backupHandler(elapsedTime?: number): any {
-    if (!this.serverIsOnline) return;
     if (this.isPaused) return;
 
     this.isBackuping = true;

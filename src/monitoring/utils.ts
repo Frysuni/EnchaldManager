@@ -43,7 +43,7 @@ export async function getServerStatus(address: string, port: number, hiddenPlaye
 }
 
 // Просто нереальна
-export function parseAndDivideAndLimitPlayers(rawPlayers?: string[]): [string[], string[], string[]] {
+export function parseAndDivideAndLimitPlayers(rawPlayers?: string[]): [string[], string[]] {
   const parsePlayerName = (name: string): string => `• ${name.replace(/_/g, '\\_').replace(/\*/g, '\\*').replace(/~/g, '\\~').replace(/`/g, '\\`')}\n`;
   rawPlayers = rawPlayers?.map(parsePlayerName) ?? [];
 
@@ -66,18 +66,16 @@ export function parseAndDivideAndLimitPlayers(rawPlayers?: string[]): [string[],
     return limitedPlayers;
   };
 
-  const third = Math.round(rawPlayers.length / 3);
-  const firstThird  = limit(rawPlayers.slice(0, third));
-  const secondThird = limit(rawPlayers.slice(third, 2 * third));
-  const lastThird   = limit(rawPlayers.slice(2 * third));
+  const half = Math.round(rawPlayers.length / 2);
+  const firstHalf = limit(rawPlayers.slice(0, half));
+  const secondHalf = limit(rawPlayers.slice(half));
 
-  if (firstThird.length == 0 && lastThird.length > 0) firstThird[0] = lastThird.shift() as string;
-  if (wasCutOff > 0) firstThird.push(`...${wasCutOff} ещё`);
+  if (firstHalf.length === 0 && secondHalf.length > 0) firstHalf[0] = secondHalf.shift() as string;
+  if (wasCutOff > 0) firstHalf.push(`...${wasCutOff} ещё`);
 
   return [
-    firstThird,
-    secondThird,
-    lastThird,
+    firstHalf,
+    secondHalf,
   ];
 }
 

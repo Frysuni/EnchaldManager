@@ -27,8 +27,8 @@ export class AppLogger extends ConsoleLogger implements LoggerService {
     if (!logChannel?.isTextBased()) return;
 
     let content = '**Ошибка!**\n';
-    content += '**`' + message ?? '{UNKNOWN}' + '`**';
-    if (trace) content += `\n${trace}`;
+    content += '**`' + (message ?? '{UNKNOWN}') + '`**';
+    if (trace) content += `\n\`\`\`${trace}\`\`\``;
 
     logChannel.send({ content });
   }

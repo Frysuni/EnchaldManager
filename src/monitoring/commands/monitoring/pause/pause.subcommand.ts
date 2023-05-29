@@ -35,7 +35,7 @@ export class PauseSubcommand {
   async targetAutocomplete(@IA() interaction: Interaction): Promise<void> {
     if (!interaction.isAutocomplete()) return;
     if (interaction.commandName !== 'monitoring') return;
-    if (interaction.options.getSubcommand() !== 'delete') return;
+    if (interaction.options.getSubcommand() !== 'pause') return;
 
     const focused = interaction.options.getFocused().trim();
 

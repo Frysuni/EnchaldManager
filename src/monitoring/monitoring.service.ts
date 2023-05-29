@@ -55,7 +55,7 @@ export class MonitoringService {
 
   public async updateMonitoring(id: number, updateEntity: QueryDeepPartialEntity<MonitoringEntity>): Promise<any> {
     await this.monitoringRepository.update({ id }, updateEntity);
-    this.monitoringNodes.get(id)?.destroy();
+    this.monitoringNodes.get(id)?.destroy(false);
     this.monitoringNodes.delete(id);
     this.initNode(id);
   }
@@ -65,7 +65,7 @@ export class MonitoringService {
   }
 
   public deleteMonitoring(id: number): Promise<any> {
-    this.monitoringNodes.get(id)?.destroy();
+    this.monitoringNodes.get(id)?.destroy(true);
     this.monitoringNodes.delete(id);
     return this.monitoringRepository.delete({ id });
   }
