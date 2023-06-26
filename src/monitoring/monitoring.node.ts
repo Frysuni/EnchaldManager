@@ -138,7 +138,7 @@ export class MonitoringNode {
   private async setStatus(embed: EmbedBuilder, presence: PresenceData): Promise<any> {
     const messageId = await this.getMessageId();
 
-    const message = await (this.nodeClient.guilds.cache.first()?.channels.cache.get(this.node.channelId) as TextBasedChannel).messages.fetch(messageId) as Message<true>;
+    const message = await (this.nodeClient.channels.cache.get(this.node.channelId) as TextBasedChannel).messages.fetch(messageId) as Message<true>;
     this.nodeClient?.user?.setPresence(presence);
     message.edit({ embeds: [embed] });
   }
