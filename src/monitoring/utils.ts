@@ -27,18 +27,18 @@ export async function getServerStatus(address: string, port: number, hiddenPlaye
     : undefined;
 
   const playersMax = 'players' in res
-    ? res.players.max - hiddenPlayersCount
-    : res.maxPlayers - hiddenPlayersCount;
+    ? res.players.max
+    : res.maxPlayers;
 
   const playersCount = 'players' in res
-    ? res.players.online - hiddenPlayersCount
-    : res.playerCount - hiddenPlayersCount;
+    ? res.players.online
+    : res.playerCount;
 
   return {
     status: ServerStatusEnum.Started,
     players,
-    playersMax,
-    playersCount,
+    playersMax: playersMax - hiddenPlayers.length,
+    playersCount: playersCount - hiddenPlayersCount,
   };
 }
 
