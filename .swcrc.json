@@ -7,7 +7,12 @@
       "decorators": true,
       "dynamicImport": true
     },
-    "baseUrl": "./"
+    "baseUrl": "dist",
+    "paths": {
+      "@env": ["./envConfig"],
+      "~/*": ["./*"]
+    }
   },
-  "minify": false
+  "minify": false,
+  "inputSourceMap": true
 }
