@@ -26,6 +26,8 @@
     "@nestjs/platform-socket.io": "^10.1.0",
     "@nestjs/typeorm": "^10.0.0",
     "@nestjs/websockets": "^10.1.0",
+    "@swc/cli": "^0.1.62",
+    "@swc/core": "^1.3.70",
     "cron": "^2.3.1",
     "cron-parser": "^4.8.1",
     "cross-env": "^7.0.3",
