@@ -14,10 +14,6 @@ export class BotGateway {
   @Once(Events.ClientReady)
   private async onReady(): Promise<any> {
     this.client.guilds.fetch().then(guilds => {
-      if (guilds.size > 1) {
-        this.logger.error('Бот не может быть запущен в нескольких гильдиях!');
-        process.exit(1);
-      }
       if (guilds.size == 0) {
         this.logger.error('Бот должен находится в гильдии для начала работы!');
         process.exit(1);
