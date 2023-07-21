@@ -23,7 +23,7 @@ export class AppLogger extends ConsoleLogger implements LoggerService {
 
   private logErrorToDiscord(message: string, trace: string): void {
     if (!envConfig.logChannelId) return;
-    const logChannel = this.client.guilds.cache.first()?.channels.cache.get(envConfig.logChannelId);
+    const logChannel = this.client.guilds.cache.get(envConfig.guildId)?.channels.cache.get(envConfig.logChannelId);
     if (!logChannel?.isTextBased()) return;
 
     let content = '**Ошибка!**\n';

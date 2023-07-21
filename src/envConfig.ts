@@ -12,6 +12,7 @@ const main = {
   token: env.get('TOKEN').required().asString(),
   logChannelId: env.get('LOG_CHANNEL_ID').asString(),
   devMode: env.get('NODE_ENV').asString() === 'dev',
+  guildId: env.get('GUILD_ID').required().asString(),
 };
 
 const database: DataSourceOptions = {
