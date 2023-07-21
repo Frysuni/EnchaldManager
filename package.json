@@ -32,8 +32,7 @@
     "discord.js": "^14.11.0",
     "dotenv": "^16.3.1",
     "env-var": "^7.3.1",
-    "gamedig": "^4.0.6",
-    "minecraft-protocol": "^1.43.2",
+    "minecraft-server-util": "^5.4.4",
     "mysql2": "^3.5.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^5.0.1",
@@ -46,7 +45,6 @@
   "devDependencies": {
     "@nestjs/schematics": "^10.0.1",
     "@types/cron": "^2.0.1",
-    "@types/gamedig": "^4.0.1",
     "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",

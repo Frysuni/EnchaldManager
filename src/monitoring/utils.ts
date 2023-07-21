@@ -1,4 +1,4 @@
-import { ping, PingOptions } from 'minecraft-protocol';
+import { queryFull } from 'minecraft-server-util';
 import { resolve } from 'path';
 import { ServerStatusEnum } from "./enums/serverStatus.enum";
 
@@ -8,37 +8,21 @@ export type ServerStatusType<Started extends boolean = boolean> =
     : { status: ServerStatusEnum.Stopped };
 
 export async function getServerStatus(address: string, port: number, hiddenPlayers: string[]): Promise<ServerStatusType> {
-  const options: PingOptions = {
-    closeTimeout: 2000,
-    noPongTimeout: 2000,
-    host: address, port,
-  };
 
-  const res = await ping(options).catch(() => false) as Awaited<ReturnType<typeof ping>> | false;
+  const res = await queryFull(address, port, { enableSRV: true }).catch(() => false) as Awaited<ReturnType<typeof queryFull>> | false;
   if (!res) return { status: ServerStatusEnum.Stopped };
 
   let hiddenPlayersCount = 0;
 
-  const players = 'players' in res && res.players.sample
-    ? res.players.sample
-      .map(player => player.name)
-      .filter(playerName => hiddenPlayers.includes(playerName) ? !++hiddenPlayersCount : true)
-      .sort((nameA, nameB) => nameA.localeCompare(nameB))
-    : undefined;
-
-  const playersMax = 'players' in res
-    ? res.players.max
-    : res.maxPlayers;
-
-  const playersCount = 'players' in res
-    ? res.players.online
-    : res.playerCount;
+  const players = res.players.list
+    .filter(playerName => hiddenPlayers.includes(playerName) ? !++hiddenPlayersCount : true)
+    .sort((nameA, nameB) => nameA.localeCompare(nameB));
 
   return {
     status: ServerStatusEnum.Started,
     players,
-    playersMax: playersMax - hiddenPlayers.length,
-    playersCount: playersCount - hiddenPlayersCount,
+    playersMax: res.players.max - hiddenPlayers.length,
+    playersCount: res.players.online - hiddenPlayersCount,
   };
 }
 
