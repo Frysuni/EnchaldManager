@@ -12,19 +12,21 @@ async function getPlayersByMinecraftProtocolLib(address: string, port: number) {
   const res = await ping({
     host: address, port,
   }) as NewPingResult;
-  return { players: res.players.sample!.map(player => player.name), playersMax: res.players.max };
+  return { players: (res.players.sample ?? []).map(player => player.name), playersMax: res.players.max };
 }
+
 async function getPlayersByMinecraftServerUtil(address: string, port: number) {
   const res = await queryFull(address, port, { enableSRV: true });
   return { players: res.players.list, playersMax: res.players.max };
 }
+
 function getPlayers(address: string, port: number) {
   type a = { players: string[], playersMax: number };
-  return new Promise<a>(res => {
+  return new Promise<a | false>(res => {
     getPlayersByMinecraftServerUtil(address, port)
       .then(res)
       .catch(async () => {
-        getPlayersByMinecraftProtocolLib(address, port).then(res);
+        getPlayersByMinecraftProtocolLib(address, port).then(res).catch(() => res(false));
       });
   });
 }
@@ -42,7 +44,7 @@ export async function getServerStatus(address: string, port: number, hiddenPlaye
   return {
     status: ServerStatusEnum.Started,
     players,
-    playersMax: res.playersMax - hiddenPlayers.length,
+    playersMax: res.playersMax,
     playersCount: res.players.length - hiddenPlayersCount,
   };
 }
