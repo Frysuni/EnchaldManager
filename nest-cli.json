@@ -2,15 +2,9 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "builder": {
-      "type": "swc",
-      "options": {
-        "swcrcPath": ".swcrc.json"
-      }
-    },
-    "typeCheck": true,
     "deleteOutDir": true,
     "tsConfigPath": "tsconfig.json",
-    "webpack": false
+    "builder": "tsc",
+    "manualRestart": true
   }
 }

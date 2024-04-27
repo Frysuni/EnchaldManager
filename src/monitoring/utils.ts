@@ -7,29 +7,37 @@ export type ServerStatusType<Started extends boolean = boolean> =
   Started extends true
     ? { status: ServerStatusEnum.Started, players?: string[], playersMax: number, playersCount: number }
     : { status: ServerStatusEnum.Stopped };
+type a = { playersList: string[], playersCount: number, playersMax: number };
 
-async function getPlayersByMinecraftProtocolLib(address: string, port: number) {
+async function getPlayersByMinecraftProtocolLib(address: string, port: number): Promise<a> {
   const res = await ping({
     host: address, port,
   }) as NewPingResult;
-  return { players: (res.players.sample ?? []).map(player => player.name), playersMax: res.players.max };
+  return {
+    playersList: (res.players.sample ?? []).map(player => player.name),
+    playersCount: res.players.online,
+    playersMax: res.players.max,
+  };
 }
 
-async function getPlayersByMinecraftServerUtil(address: string, port: number) {
+async function getPlayersByMinecraftServerUtil(address: string, port: number): Promise<a> {
   const res = await queryFull(address, port, { enableSRV: true });
-  return { players: res.players.list, playersMax: res.players.max };
+  return { playersList: res.players.list, playersCount: res.players.online, playersMax: res.players.max };
 }
 
-function getPlayers(address: string, port: number) {
-  type a = { players: string[], playersMax: number };
-  return new Promise<a | false>(res => {
-    getPlayersByMinecraftServerUtil(address, port)
-      .then(res)
-      .catch(async () => {
-        getPlayersByMinecraftProtocolLib(address, port).then(res).catch(() => res(false));
-      });
-  });
+async function getPlayers(address: string, port: number): Promise<a | false> {
+  const first = await getPlayersByMinecraftServerUtil(address, port).catch<false>(() => false);
+  const second = await getPlayersByMinecraftProtocolLib(address, port).catch<false>(() => false);
+
+  if (!first || !second) return first || second;
+
+  return {
+    playersCount: Math.max(first.playersCount, second.playersCount),
+    playersList: (first.playersList.length > second.playersList.length) ? first.playersList : second.playersList,
+    playersMax: Math.max(first.playersMax, second.playersMax),
+  };
 }
+
 export async function getServerStatus(address: string, port: number, hiddenPlayers: string[]): Promise<ServerStatusType> {
 
   const res = await getPlayers(address, port).catch(() => false) as Awaited<ReturnType<typeof getPlayers>> | false;
@@ -37,7 +45,7 @@ export async function getServerStatus(address: string, port: number, hiddenPlaye
 
   let hiddenPlayersCount = 0;
 
-  const players = res.players
+  const players = res.playersList
     .filter(playerName => hiddenPlayers.includes(playerName) ? !++hiddenPlayersCount : true)
     .sort((nameA, nameB) => nameA.localeCompare(nameB));
 
@@ -45,7 +53,7 @@ export async function getServerStatus(address: string, port: number, hiddenPlaye
     status: ServerStatusEnum.Started,
     players,
     playersMax: res.playersMax,
-    playersCount: res.players.length - hiddenPlayersCount,
+    playersCount: res.playersCount - hiddenPlayersCount,
   };
 }
 

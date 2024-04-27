@@ -31,7 +31,7 @@ export class MonitoringNode {
     this.init();
   }
 
-  private nodeUpdateInterval: NodeJS.Timer | undefined;
+  private nodeUpdateInterval: NodeJS.Timeout | undefined;
   private async init(): Promise<any> {
     const node = await this.monitroingRepository.findOne({ where: { id: this.monitroingId } });
     if (!node) return;

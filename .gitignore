@@ -2,7 +2,6 @@ dist
 node_modules
 .env
 yarn-error.log
-yarn.lock
 test.ts
 getAdminStore
 build
